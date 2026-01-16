@@ -1,0 +1,109 @@
+@page "/users/edit/{Id}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<style>
+    .btn-indigo { background: #303f9f; color: white; }
+    .btn-indigo:hover { background: #303f9f; color: white; }
+    .btn-danger { background: #c62828; color: white; }
+    .btn-danger:hover { background: #b71c1c; color: white; }
+    #togglePassword {
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #999;
+    }
+    #togglePassword:hover { color: #303f9f; }
+</style>
+
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Edit User</h2>
+
+    <div class="card shadow-sm border-0 p-4" style="max-width: 600px; margin: auto;">
+        <EditForm Model="@Model" OnValidSubmit="@UpdateUser">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" />
+
+            @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+            {
+                <div class="alert alert-danger">@ErrorMessage</div>
+            }
+
+            <div class="form-group mb-3">
+                <label class="form-label fw-semibold">Name</label><span class="text-danger">*</span>
+                <InputText class="form-control border-dark-subtle" @bind-Value="Model.Name" />
+                <ValidationMessage For="@(() => Model.Name)" class="text-danger" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label fw-semibold">Email</label><span class="text-danger">*</span>
+                <InputText class="form-control border-dark-subtle" @bind-Value="Model.Email" />
+                <ValidationMessage For="@(() => Model.Email)" class="text-danger" />
+            </div>
+
+            <div class="form-group mb-3 position-relative">
+                <label class="form-label fw-semibold">Password (leave blank to keep current)</label>
+
+                <div class="position-relative">
+                    <input class="form-control border-dark-subtle"
+                           id="passwordField"
+                           type="@PasswordInputType"
+                           value="@Model.Password"
+                           @oninput="e => Model.Password = e.Value?.ToString()" />
+
+                    <i class="fa @EyeIcon position-absolute"
+                       id="togglePassword"
+                       title="Show/Hide password"
+                       @onclick="TogglePassword"></i>
+                </div>
+
+                <ValidationMessage For="@(() => Model.Password)" class="text-danger" />
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label fw-semibold">Role</label><span class="text-danger">*</span>
+
+                <InputSelect class="form-select border-dark-subtle"
+                             id="SelectedRole"
+                             @bind-Value="Model.SelectedRole"
+                             @onchange="OnRoleChanged">
+                    <option value="">-- Select Role --</option>
+                    @foreach (var role in Roles)
+                    {
+                        <option value="@role">@role</option>
+                    }
+                </InputSelect>
+
+                <ValidationMessage For="@(() => Model.SelectedRole)" class="text-danger" />
+            </div>
+
+            <div class="form-group mb-4">
+                <label class="form-label fw-semibold">Team</label>
+
+                <InputSelect class="form-select border-dark-subtle"
+                             @bind-Value="Model.TeamId"
+                             disabled="@TeamDisabled">
+                    <option value="">-- Select Team --</option>
+                    @foreach (var t in Teams)
+                    {
+                        <option value="@t.Id">@t.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a class="btn btn-danger px-4" href="@CancelUrl">Cancel</a>
+
+                <button type="submit" class="btn btn-indigo px-4" disabled="@IsSubmitting">
+                    @(IsSubmitting ? "Updating..." : "Update")
+                </button>
+            </div>
+        </EditForm>
+    </div>
+</div>

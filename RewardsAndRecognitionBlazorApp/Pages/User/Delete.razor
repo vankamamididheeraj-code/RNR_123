@@ -1,0 +1,58 @@
+@page "/users/delete/{Id}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="container py-5">
+    <h2 class="mb-4 text-center text-danger">
+        <i class="bi bi-trash-fill me-2"></i> Delete User
+    </h2>
+
+    <div class="card shadow-sm border-0 p-4" style="max-width: 720px; margin: auto;">
+        @if (IsBusy && User is null && ErrorMessage is null)
+        {
+            <div class="alert alert-info m-0">Loading user...</div>
+        }
+        else if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="alert alert-danger m-0">@ErrorMessage</div>
+        }
+        else if (User is not null)
+        {
+            <div class="alert alert-warning">
+                <strong>Warning:</strong> This will mark the user as deleted (soft delete).
+            </div>
+
+            <dl class="row mb-0">
+                <dt class="col-sm-4">Name</dt>
+                <dd class="col-sm-8">@User.Name</dd>
+
+                <dt class="col-sm-4">Email</dt>
+                <dd class="col-sm-8">@User.Email</dd>
+
+                <dt class="col-sm-4">Role</dt>
+                <dd class="col-sm-8">@((string.IsNullOrWhiteSpace(User.Role)) ? "No Role" : User.Role)</dd>
+
+                <dt class="col-sm-4">Team</dt>
+                <dd class="col-sm-8">@((string.IsNullOrWhiteSpace(User.TeamName)) ? "Not Assigned" : User.TeamName)</dd>
+
+                <dt class="col-sm-4">Manager</dt>
+                <dd class="col-sm-8">@((string.IsNullOrWhiteSpace(User.ManagerName)) ? "No Manager" : User.ManagerName)</dd>
+            </dl>
+
+            <hr />
+
+            <div class="d-flex justify-content-between">
+                <a class="btn btn-secondary px-4" href="@CancelUrl">
+                    <i class="bi bi-arrow-left me-1"></i> Cancel
+                </a>
+
+                <button class="btn btn-danger px-4" disabled="@IsBusy" @onclick="ConfirmDeleteAsync">
+                    <i class="bi bi-trash-fill me-1"></i> @(IsBusy ? "Deleting..." : "Delete")
+                </button>
+            </div>
+        }
+    </div>
+</div>

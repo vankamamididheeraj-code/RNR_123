@@ -1,0 +1,198 @@
+﻿@page "/users"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@using System.Linq
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="user-header">
+    <h2><i class="bi bi-people-fill me-2"></i> Users</h2>
+
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <div class="form-check form-switch">
+            <input class="form-check-input"
+                   type="checkbox"
+                   id="toggleDeletedUsers"
+                   @bind="ShowDeleted"
+                   @bind:event="onchange"
+                   @bind:after="OnShowDeletedChanged" />
+                   @* <div class="small text-muted">ShowDeleted = @ShowDeleted</div> *@
+             <label class="form-check-label" for="toggleDeletedUsers">Show Deleted</label> 
+        </div>
+
+        <a class="btn btn-primary d-flex align-items-center" href="/users/create">
+            <i class="bi bi-person-plus-fill me-1"></i> Create
+        </a>
+    </div>
+</div>
+
+<div class="mt-3">
+    @if (IsBusy && Users.Count == 0)
+    {
+        <div class="alert alert-info m-0">Loading users...</div>
+    }
+    else if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <div class="alert alert-danger m-0">@Error</div>
+    }
+    else
+    {
+        <table class="users-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Team</th>
+                    <th>Manager</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!Users.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <div class="alert alert-warning m-0" role="alert">
+                                <i class="bi bi-info-circle"></i> No users found.
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var user in Users)
+                    {
+                        var teamName = string.IsNullOrWhiteSpace(user.TeamName) ? "Not Assigned" : user.TeamName;
+                        var managerName = string.IsNullOrWhiteSpace(user.ManagerName) ? "No Manager" : user.ManagerName;
+                        var role = string.IsNullOrWhiteSpace(user.Role) ? "No Role" : user.Role;
+
+                        <tr class="@(user.IsDeleted ? "table-danger" : "")">
+                            <td>@user.Name</td>
+                            <td>@user.Email</td>
+                            <td>@teamName</td>
+                            <td>@managerName</td>
+                            <td>@role</td>
+
+                            <td>
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" href="@($"/users/edit/{user.Id}")">
+                                                <i class="bi bi-pencil-fill me-1"></i> Edit
+                                            </a>
+                                        </li>
+
+                                        @if (user.IsDeleted)
+                                        {
+                                            <li>
+                                                <button type="button"
+                                                        class="dropdown-item"
+                                                        disabled="@IsBusy"
+                                                        @onclick="() => RestoreAsync(user.Id)">
+                                                    <i class="bi bi-arrow-clockwise me-1"></i> Restore
+                                                </button>
+                                            </li>
+
+                                            <li>
+                                                <span class="dropdown-item disabled text-danger opacity-50">
+                                                    <i class="bi bi-trash-fill me-1 opacity-50"></i> Deleted
+                                                </span>
+                                            </li>
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <button type="button"
+                                                        class="dropdown-item text-danger"
+                                                        disabled="@IsBusy"
+                                                        @onclick="() => DeleteAsync(user.Id)">
+                                                    <i class="bi bi-trash-fill me-1"></i> Delete
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-end mt-2">
+            <Pager PageNumber="@PageNumber" PageSize="@PageSize" TotalCount="@TotalCount" PageChanged="async (p) => await LoadPage(p)" />
+        </div>
+    }
+</div>
+
+<style>
+    :root {
+        --indigo-main: #3f51b5;
+        --indigo-light: #5c6bc0;
+    }
+
+    .user-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .users-table th, .users-table td {
+        padding: 14px 16px;
+        text-align: left;
+    }
+
+    .users-table th {
+        background: linear-gradient(to right, var(--indigo-main), var(--indigo-light));
+        color: white;
+        font-weight: 600;
+    }
+
+    .users-table tr:nth-child(even) {
+        background-color: #f5f5f5;
+    }
+
+    .users-table tr:hover {
+        background-color: #eef1f7;
+    }
+
+    .btn.disabled, .btn:disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .dropdown-toggle::after {
+        display: none;
+    }
+
+    .users-table, .users-table tbody, .users-table tr, .users-table td {
+        overflow: visible !important;
+        position: static !important;
+    }
+
+    .dropdown-menu {
+        position: absolute !important;
+        z-index: 1050 !important;
+    }
+</style>

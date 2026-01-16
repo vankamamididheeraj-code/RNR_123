@@ -1,0 +1,473 @@
+﻿@page "/yearquarter"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@*@using RewardsAndRecognitionWebAPI.ViewModels*@
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject JsonSerializerOptions JsonOptions
+
+<PageTitle>Year Quarters</PageTitle>
+
+<style>
+    :root {
+        --indigo-main: #3f51b5;
+        --indigo-light: #5c6bc0;
+        --indigo-dark: #303f9f;
+        --danger: #c62828;
+        --danger-hover: #b71c1c;
+        --text-light: #fff;
+        --info: #0288d1;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 30px 0 20px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .yearquarter-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+
+    .yearquarter-table th, .yearquarter-table td {
+        padding: 14px 16px;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .yearquarter-table th {
+        background: linear-gradient(to right, var(--indigo-main), var(--indigo-light));
+        color: white;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .yearquarter-table tr:nth-child(even) {
+        background-color: #f5f5f5;
+    }
+
+    .yearquarter-table tr:hover {
+        background-color: #eef1f7;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .btn-primary {
+        background-color: var(--indigo-main);
+        color: white;
+    }
+    .btn-primary:hover {
+        background-color: var(--indigo-dark);
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: var(--danger);
+        color: white;
+    }
+    .btn-danger:hover {
+        background-color: var(--danger-hover);
+        color: white;
+    }
+
+    .btn-indigo {
+        background: var(--indigo-main);
+        color: white;
+    }
+    .btn-indigo:hover {
+        background: var(--indigo-dark);
+        color: white;
+    }
+
+    /* Bootstrap switch-like */
+    .switch-wrap {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    .form-switch {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-check-input {
+        width: 44px;
+        height: 22px;
+        appearance: none;
+        background: #cfcfcf;
+        border-radius: 999px;
+        position: relative;
+        outline: none;
+        border: 1px solid #bdbdbd;
+        cursor: pointer;
+        transition: 0.2s ease-in-out;
+    }
+    .form-check-input::after {
+        content: "";
+        width: 18px;
+        height: 18px;
+        background: white;
+        border-radius: 50%;
+        position: absolute;
+        top: 1px;
+        left: 2px;
+        transition: 0.2s ease-in-out;
+        box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    }
+    .form-check-input:checked {
+        background-color: var(--danger);
+        border-color: var(--danger-hover);
+    }
+    .form-check-input:checked::after {
+        left: 22px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .muted {
+        color: #6c757d;
+    }
+
+    .alert {
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        padding: 12px 14px;
+        border-radius: 8px;
+        margin-top: 12px;
+    }
+
+    .btn.disabled, .btn:disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .dropdown-toggle::after {
+        display: none;
+    }
+
+    /* Fix dropdown being clipped by table overflow */
+    .yearquarter-table, .yearquarter-table tbody, .yearquarter-table tr, .yearquarter-table td {
+        overflow: visible !important;
+        position: static !important;
+    }
+
+    .dropdown-menu {
+        position: absolute !important;
+        z-index: 1050 !important;
+    }
+
+</style>
+
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-calendar2-week-fill me-2"></i> Year Quarters</h2>
+    </div>
+
+    <div class="actions">
+        <div class="form-switch">
+            <input class="form-check-input"
+                   type="checkbox"
+                   role="switch"
+                   id="toggleFilter"
+                   @bind="ShowDeleted" />
+            <label class="form-check-label" for="toggleFilter">Show Deleted</label>
+        </div>
+
+        <a class="btn btn-primary" href="/yearquarter/create">
+            <i class="bi bi-plus-circle-fill"></i> Add Year Quarter
+        </a>
+
+        <a class="btn btn-indigo" href="/yearquarter/upload" style="white-space: nowrap;">
+            <i class="bi bi-plus-circle-fill"></i> Upload from Excel
+        </a>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert">
+        <strong>Oops:</strong> @error
+    </div>
+}
+else if (isLoading)
+{
+    <p class="muted">Loading year quarters…</p>
+}
+else if (items == null || items.Count == 0)
+{
+    <p class="muted">No year quarters found.</p>
+}
+else
+{
+    <table class="yearquarter-table">
+        <thead>
+            <tr>
+                <th>Quarter</th>
+                <th>Year</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Active</th>
+                <th style="width: 220px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var yq in items)
+            {
+                <tr>
+                    <td>@(yq.Quarter?.ToString() ?? "-")</td>
+                    <td>@yq.Year</td>
+                    <td>@(yq.StartDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                    <td>@(yq.EndDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                    <td>
+                        @if (yq.IsActive)
+                        {
+                            <span class="badge bg-success">Yes</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">No</span>
+                        }
+                    </td>
+                    <td>
+                        @if (showDeleted)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle"
+                                        type="button"
+                                        id="dropdownMenuButton-@yq.Id"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@yq.Id">
+                                    <li>
+                                        <button type="button" class="dropdown-item" disabled="@isLoading"
+                                                @onclick="() => Restore(yq.Id)">
+                                            <i class="bi bi-arrow-clockwise"></i> Restore
+                                        </button>
+                                    </li>
+
+                                    <li>
+                                        <span class="dropdown-item disabled text-muted opacity-50">
+                                            <i class="bi bi-pencil-fill me-1 opacity-50"></i> Edit
+                                        </span>
+                                    </li>
+
+                                    <li>
+                                        <span class="dropdown-item disabled text-danger opacity-50">
+                                            <i class="bi bi-trash-fill me-1 opacity-50"></i> Deleted
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle"
+                                        type="button"
+                                        id="dropdownMenuButton-@yq.Id"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                    <i class="bi bi-three-dots-vertical"></i>
+                                </button>
+
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@yq.Id">
+                                    <li>
+                                        <a class="dropdown-item" href="@($"/yearquarter/edit/{yq.Id}")">
+                                            <i class="bi bi-pencil-fill me-1"></i> Edit
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <button type="button" class="dropdown-item text-danger" disabled="@isLoading"
+                                                @onclick="() => ConfirmAndDelete(yq.Id)">
+                                            <i class="bi bi-trash-fill me-1"></i> Delete
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-3 d-flex justify-content-end align-items-center">
+        <Pager PageNumber="pageNumber" PageSize="pageSize" TotalCount="totalCount" PageChanged="OnPageChanged" />
+    </div>
+}
+
+@code {
+    //private bool showDeleted = false;
+    private bool isLoading = true;
+    private string? error;
+    private List<YearQuarterView> items = new();
+
+    private bool showDeleted;
+
+    // paging
+    private int pageNumber = 1;
+    private int pageSize = 10;
+    private long totalCount = 0;
+
+    // private bool ShowDeleted
+    // {
+    //     get => showDeleted;
+    //     set
+    //     {
+    //         if (showDeleted == value) return;
+    //         showDeleted = value;
+    //         _ = LoadAsync(); fire & forget
+    //     }
+    // }
+
+    private bool ShowDeleted
+    {
+        get => showDeleted;
+        set
+        {
+            if (showDeleted == value) return;
+            showDeleted = value;
+
+            // Run the async load safely and force UI refresh
+            _ = InvokeAsync(async () =>
+            {
+                await LoadAsync();
+                StateHasChanged();
+            });
+        }
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task OnToggleChanged(ChangeEventArgs _)
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            error = null;
+            isLoading = true;
+
+            await InvokeAsync(StateHasChanged);
+
+            var url = $"api/yearquarter/paged?pageNumber={pageNumber}&pageSize={pageSize}&includeDeleted={showDeleted}";
+
+            var paged = await Http.GetFromJsonAsync<RewardsAndRecognitionBlazorApp.ViewModels.PagedResult<YearQuarterView>>(url, JsonOptions);
+            if (paged != null)
+            {
+                items = paged.Items?.ToList() ?? new List<YearQuarterView>();
+                pageNumber = paged.PageNumber;
+                pageSize = paged.PageSize;
+                totalCount = paged.TotalCount;
+            }
+            else
+            {
+                items = new List<YearQuarterView>();
+                totalCount = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+            items = new List<YearQuarterView>();
+        }
+        finally
+        {
+            isLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+
+    }
+
+    private async Task OnPageChanged(int newPage)
+    {
+        pageNumber = newPage;
+        await LoadAsync();
+    }
+
+    private async Task ConfirmAndDelete(Guid id)
+    {
+        // SweetAlert2 confirm (you must include SweetAlert2 in index.html/_Host.cshtml)
+        var confirmed = await JS.InvokeAsync<bool>("yearQuarterConfirmDelete");
+        if (!confirmed) return;
+
+        try
+        {
+            error = null;
+            var resp = await Http.DeleteAsync($"api/yearquarter/{id}");
+            if (!resp.IsSuccessStatusCode)
+            {
+                error = $"Delete failed ({(int)resp.StatusCode}).";
+                return;
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private async Task Restore(Guid id)
+    {
+        try
+        {
+            error = null;
+            var resp = await Http.PostAsync($"api/yearquarter/{id}/restore", content: null);
+            if (!resp.IsSuccessStatusCode)
+            {
+                error = $"Restore failed ({(int)resp.StatusCode}).";
+                return;
+            }
+
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+}

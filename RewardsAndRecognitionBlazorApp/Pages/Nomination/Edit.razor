@@ -1,0 +1,255 @@
+@page "/nominations/edit/{Id:guid}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<h2 class="mb-4"><i class="bi bi-pencil-square"></i> Edit Nomination</h2>
+
+@if (isLoading)
+{
+    <div class="page-loading-spinner">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+    <button class="btn btn-secondary" @onclick="@(() => Nav.NavigateTo("/nominations"))">
+        <i class="bi bi-arrow-left"></i> Back
+    </button>
+}
+else if (nomination is null || editModel is null)
+{
+    <div class="alert alert-warning">Nomination not found.</div>
+    <button class="btn btn-secondary" @onclick="@(() => Nav.NavigateTo("/nominations"))">
+    <i class="bi bi-arrow-left"></i> Back
+</button>
+
+}
+else
+{
+    <EditForm Model="editModel" OnValidSubmit="SaveAsync" class="card p-4 shadow bg-white text-dark">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        @* Hidden fields in MVC are NOT rendered here.
+           We preserve them server-side by using an Update DTO *@
+
+        <div class="mb-3">
+            <label class="form-label"><i class="bi bi-award"></i> Category</label>
+            <InputSelect class="form-select" @bind-Value="editModel.CategoryId">
+                <option value="">-- Select --</option>
+                @foreach (var c in categories)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => editModel.CategoryId)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><i class="bi bi-calendar-range"></i> Quarter</label>
+            <InputSelect class="form-select" @bind-Value="editModel.YearQuarterId">
+                <option value="">-- Select --</option>
+                @foreach (var yq in yearQuarters)
+                {
+                    <option value="@yq.Id">@($"{yq.Year} Q{yq.Quarter}")</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => editModel.YearQuarterId)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><i class="bi bi-card-text"></i> Description</label>
+            <InputTextArea class="form-control" rows="4" @bind-Value="editModel.Description" />
+            <ValidationMessage For="@(() => editModel.Description)" class="text-danger" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><i class="bi bi-trophy"></i> Achievements</label>
+            <InputTextArea class="form-control" rows="3" @bind-Value="editModel.Achievements" />
+            <ValidationMessage For="@(() => editModel.Achievements)" class="text-danger" />
+        </div>
+
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn btn-primary" disabled="@isSaving">
+                <i class="bi bi-save"></i> @(isSaving ? "Saving..." : "Save Changes")
+            </button>
+
+            <button type="button" class="btn btn-indigo" @onclick="OpenPreviewFromEdit" disabled="@isSaving">
+                <i class="bi bi-eye"></i> Preview
+            </button>
+
+            <button type="button" class="btn btn-secondary" @onclick="Cancel" disabled="@isSaving">
+                <i class="bi bi-x-circle"></i> Cancel
+            </button>
+        </div>
+    </EditForm>
+}
+
+@* Preview popup (uses your NominationPreview model shape) *@
+@if (showPreview && preview != null)
+{
+    <div class="popup-overlay" style="display:flex;" @onclick="ClosePreview">
+        <div class="popup-review-card" @onclick:stopPropagation="true">
+            <div class="popup-sticky-header">
+                <div class="popup-header">
+                    <h4 class="m-0 text-indigo">Nomination Preview</h4>
+                    <button class="popup-close" @onclick="ClosePreview">�</button>
+                </div>
+            </div>
+
+            <div class="popup-scroll-body">
+                <div class="popup-fields">
+                    <div class="popup-field">
+                        <span class="popup-label">Nominee Email</span>
+                        <div class="popup-block">@preview.NomineeEmail</div>
+                    </div>
+
+                    <div class="popup-field">
+                        <span class="popup-label">Category</span>
+                        <div class="popup-block">@preview.CategoryName</div>
+                    </div>
+
+                    <div class="popup-field">
+                        <span class="popup-label">Year / Quarter</span>
+                        <div class="popup-block">@preview.YearQuarterName</div>
+                    </div>
+
+                    <div class="popup-field">
+                        <span class="popup-label">Description</span>
+                        <div class="popup-block">@preview.Description</div>
+                    </div>
+
+                    <div class="popup-field">
+                        <span class="popup-label">Achievements</span>
+                        <div class="popup-block">@preview.Achievements</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private bool isLoading = true;
+    private bool isSaving = false;
+    private string? error;
+
+    private NominationView? nomination;
+    private UpdateNominationView? editModel;
+
+    private List<CategoryView> categories = new();
+    private List<YearQuarterView> yearQuarters = new();
+
+    private bool showPreview;
+    private NominationPreview? preview;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // 1) Load nomination
+            nomination = await Http.GetFromJsonAsync<NominationView>($"api/nomination/{Id}");
+            if (nomination is null)
+            {
+                error = "Nomination not found.";
+                return;
+            }
+
+            // 2) Load dropdown lists (adjust endpoints to match your API)
+            // If you don't have these endpoints yet, tell me and I�ll write them.
+            var catsTask = Http.GetFromJsonAsync<List<CategoryView>>("api/category");
+            var yqTask = Http.GetFromJsonAsync<List<YearQuarterView>>("api/yearquarter");
+            await Task.WhenAll(catsTask!, yqTask!);
+
+            categories = catsTask?.Result ?? new();
+            yearQuarters = yqTask?.Result ?? new();
+
+            // 3) Map to editable-only DTO
+            editModel = new UpdateNominationView
+            {
+                Id = nomination.Id,
+                CategoryId = nomination.CategoryId,
+                YearQuarterId = nomination.YearQuarterId,
+                Description = nomination.Description ?? "",
+                Achievements = nomination.Achievements ?? ""
+            };
+        }
+        catch (Exception ex)
+        {
+            error = $"Failed to load: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (editModel is null) return;
+
+        isSaving = true;
+        try
+        {
+            var resp = await Http.PutAsJsonAsync($"api/nomination/{Id}", editModel);
+
+            if (resp.IsSuccessStatusCode)
+            {
+                Nav.NavigateTo("/nominations");
+            }
+            else
+            {
+                var msg = await resp.Content.ReadAsStringAsync();
+                await JS.InvokeVoidAsync("alert",
+                    $"Save failed: {(string.IsNullOrWhiteSpace(msg) ? resp.StatusCode.ToString() : msg)}");
+            }
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void Cancel() => Nav.NavigateTo("/nominations");
+
+    private void OpenPreviewFromEdit()
+    {
+        if (nomination is null || editModel is null) return;
+
+        var categoryName =
+            categories.FirstOrDefault(c => c.Id == editModel.CategoryId)?.Name
+            ?? nomination.Category?.Name
+            ?? nomination.CategoryId.ToString();
+
+        var yq = yearQuarters.FirstOrDefault(y => y.Id == editModel.YearQuarterId) ?? nomination.YearQuarter;
+        var yearQuarterName = yq != null ? $"{yq.Year} Q{yq.Quarter}" : nomination.YearQuarterId.ToString();
+
+        preview = new NominationPreview
+        {
+            NomineeEmail = nomination.Nominee?.Email ?? nomination.NomineeId,
+            CategoryName = categoryName,
+            YearQuarterName = yearQuarterName,
+            Description = editModel.Description ?? "",
+            Achievements = editModel.Achievements ?? ""
+        };
+
+        showPreview = true;
+    }
+
+    private void ClosePreview()
+    {
+        showPreview = false;
+        preview = null;
+    }
+}

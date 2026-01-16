@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36717.8
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RewardsAndRecognitionBlazorApp", "RewardsAndRecognitionBlazorApp\RewardsAndRecognitionBlazorApp.csproj", "{40193009-7985-46C2-BE5C-1DD76FA50F83}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RewardsAndRecognitionRepository", "RewardsAndRecognitionRepository\RewardsAndRecognitionRepository.csproj", "{6F50E404-79CF-4110-BCAB-49AC08584C61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RewardsAndRecognitionWebAPI", "RewardsAndRecognitionWebAPI\RewardsAndRecognitionWebAPI.csproj", "{2BC01D24-A2A9-48E8-8664-A363BEEB69FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{40193009-7985-46C2-BE5C-1DD76FA50F83}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40193009-7985-46C2-BE5C-1DD76FA50F83}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40193009-7985-46C2-BE5C-1DD76FA50F83}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{40193009-7985-46C2-BE5C-1DD76FA50F83}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F50E404-79CF-4110-BCAB-49AC08584C61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F50E404-79CF-4110-BCAB-49AC08584C61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F50E404-79CF-4110-BCAB-49AC08584C61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F50E404-79CF-4110-BCAB-49AC08584C61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BC01D24-A2A9-48E8-8664-A363BEEB69FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BC01D24-A2A9-48E8-8664-A363BEEB69FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BC01D24-A2A9-48E8-8664-A363BEEB69FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BC01D24-A2A9-48E8-8664-A363BEEB69FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {01987689-58B0-4849-8860-AF2BBFA7F290}
+	EndGlobalSection
+EndGlobal

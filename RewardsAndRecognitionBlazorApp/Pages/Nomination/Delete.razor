@@ -1,0 +1,122 @@
+@page "/nominations/delete/{id:guid}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject ILogger<Delete> Logger
+
+@using RewardsAndRecognitionBlazorApp.ViewModels
+
+<PageTitle>Delete Nomination</PageTitle>
+
+<div class="container mx-auto p-4">
+    <h2 class="text-2xl font-semibold mb-4">Delete Nomination</h2>
+
+    @if (isLoading)
+    {
+        <div class="page-loading-spinner">Loading...</div>
+    }
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="text-red-600 mb-4">@errorMessage</div>
+    }
+
+    @if (nomination != null)
+    {
+        <div class="bg-white shadow rounded p-4 mb-4">
+            <div class="mb-2"><strong>Nominator:</strong> @nomination.Nominator?.Name</div>
+            <div class="mb-2"><strong>Nominee:</strong> @nomination.Nominee?.Name</div>
+            <div class="mb-2"><strong>Category:</strong> @nomination.Category?.Name</div>
+            <div class="mb-2"><strong>Quarter:</strong> @((nomination.YearQuarter != null) ? $"{nomination.YearQuarter.Year} {nomination.YearQuarter.Quarter}" : string.Empty)</div>
+            <div class="mb-2"><strong>Description:</strong> @nomination.Description</div>
+            <div class="mb-2"><strong>Achievements:</strong> @nomination.Achievements</div>
+            <div class="mb-2"><strong>Status:</strong> @nomination.Status</div>
+        </div>
+
+        <div class="flex gap-2">
+            <button class="btn btn-danger" @onclick="ConfirmDelete" disabled="@isSubmitting">Delete</button>
+            <button class="btn" @onclick="Cancel" disabled="@isSubmitting">Cancel</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid id { get; set; }
+
+    private NominationView? nomination;
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var resp = await Http.GetAsync($"api/nomination/{id}");
+            var body = await resp.Content.ReadAsStringAsync();
+            if (!resp.IsSuccessStatusCode)
+            {
+                throw new Exception($"Load failed: {(int)resp.StatusCode} {resp.ReasonPhrase}. Body: {body}");
+            }
+
+            nomination = System.Text.Json.JsonSerializer.Deserialize<NominationView>(body, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (nomination == null)
+                errorMessage = "Nomination not found or invalid response.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error loading nomination. " + ex.Message;
+            Logger.LogError(ex, "Error loading nomination {Id}", id);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ConfirmDelete()
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this nomination?");
+        if (!confirmed)
+            return;
+
+        await DeleteNomination();
+    }
+
+    private async Task DeleteNomination()
+    {
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var resp = await Http.DeleteAsync($"api/nomination/{id}");
+            if (resp.IsSuccessStatusCode)
+            {
+                Nav.NavigateTo("/nominations", true);
+                return;
+            }
+
+            var content = await resp.Content.ReadAsStringAsync();
+            errorMessage = $"Delete failed: {content}";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while deleting nomination.";
+            Logger.LogError(ex, "Error deleting nomination {Id}", id);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Cancel() => Nav.NavigateTo("/nominations");
+}

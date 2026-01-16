@@ -1,0 +1,27 @@
+﻿@page "/logout"
+@layout EmptyLayout
+@using Microsoft.AspNetCore.Components
+@using RewardsAndRecognitionBlazorApp.Shared
+
+<h1>Log out</h1>
+
+@if (isProcessing)
+{
+    <p>Logging you out...</p>
+}
+else
+{
+    @if (!hasLoggedOut)
+    {
+        <!-- Similar to MVC: show logout button -->
+        <button class="btn btn-link text-dark" @onclick="OnLogoutClicked">
+            Click here to Logout
+        </button>
+    }
+    else
+    {
+        <!-- After logout -->
+        <p>You have successfully logged out of the application.</p>
+        <button class="btn btn-primary" @onclick="GoHome">Go to Home</button>
+    }
+}

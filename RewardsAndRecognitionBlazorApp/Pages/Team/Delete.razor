@@ -1,0 +1,188 @@
+﻿@page "/teams/delete/{Id:guid}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using System.Net.Http.Json
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject JsonSerializerOptions JsonOptions
+
+<h2 class="mb-3 text-danger">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Team
+</h2>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert alert-danger">@Error</div>
+}
+
+@if (IsLoading)
+{
+    <div class="alert alert-info">Loading team...</div>
+}
+else if (Team is null)
+{
+    <div class="alert alert-warning">
+        Team not found.
+        <button class="btn btn-link p-0 ms-2" @onclick="Back">Back</button>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+
+            <p class="mb-3">
+                Are you sure you want to delete the following team?
+            </p>
+
+            <ul class="list-group mb-3">
+                <li class="list-group-item">
+                    <strong>Name:</strong> @Team.Name
+                </li>
+                <li class="list-group-item">
+                    <strong>Team Lead:</strong> @TeamLeadName
+                </li>
+                <li class="list-group-item">
+                    <strong>Manager:</strong> @ManagerName
+                </li>
+                <li class="list-group-item">
+                    <strong>Director:</strong> @DirectorName
+                </li>
+            </ul>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary"
+                        disabled="@IsBusy"
+                        @onclick="Back">
+                    Cancel
+                </button>
+
+                <button class="btn btn-danger"
+                        disabled="@IsBusy"
+                        @onclick="DeleteAsync">
+                    <i class="bi bi-trash-fill me-1"></i>
+                    @(IsBusy ? "Deleting..." : "Delete")
+                </button>
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private TeamView Team { get; set; }
+
+    // 👇 DISPLAY NAMES (not IDs)
+    private string TeamLeadName { get; set; } = "Not Assigned";
+    private string ManagerName { get; set; } = "Not Assigned";
+    private string DirectorName { get; set; } = "Not Assigned";
+
+    private bool IsLoading { get; set; } = true;
+    private bool IsBusy { get; set; }
+    private string? Error { get; set; }
+
+    // userId -> userName
+    private Dictionary<string, string> UserMap { get; set; } =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAllAsync();
+    }
+
+    private async Task LoadAllAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            Error = null;
+
+            await LoadUserMapAsync();
+
+            Team = await Http.GetFromJsonAsync<TeamView>($"api/Team/{Id}", JsonOptions);
+
+            if (Team != null)
+            {
+                TeamLeadName = ResolveName(Team.TeamLeadId);
+                ManagerName = ResolveName(Team.ManagerId);
+                DirectorName = ResolveName(Team.DirectorId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Team = null;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadUserMapAsync()
+    {
+        // ✅ Your UserController: GET api/user
+        var users = await Http.GetFromJsonAsync<List<UserViewDto>>("api/user", JsonOptions) ?? new();
+
+        UserMap = users
+            .Where(u => !string.IsNullOrWhiteSpace(u.Id))
+            .ToDictionary(
+                u => u.Id!.Trim(),
+                u => string.IsNullOrWhiteSpace(u.Name) ? "Unknown" : u.Name.Trim(),
+                StringComparer.OrdinalIgnoreCase
+            );
+    }
+
+    private string ResolveName(string? userId)
+    {
+        if (string.IsNullOrWhiteSpace(userId))
+            return "Not Assigned";
+
+        return UserMap.TryGetValue(userId.Trim(), out var name)
+            ? name
+            : "Unknown";
+    }
+
+    private async Task DeleteAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            // Soft delete
+            var response = await Http.DeleteAsync($"api/Team/{Id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Error = $"Delete failed ({(int)response.StatusCode})";
+                return;
+            }
+
+            Nav.NavigateTo("/teams");
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void Back()
+    {
+        Nav.NavigateTo("/teams");
+    }
+
+    // Matches GET api/user output
+    private sealed class UserViewDto
+    {
+        public string? Id { get; set; }
+        public string? Name { get; set; }
+    }
+}

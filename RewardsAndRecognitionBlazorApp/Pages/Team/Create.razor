@@ -1,0 +1,227 @@
+﻿@page "/teams/create"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject JsonSerializerOptions JsonOptions
+
+<h2 class="mb-3">
+    <i class="bi bi-plus-circle me-2"></i> Create Team
+</h2>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert alert-danger">@Error</div>
+}
+
+@if (IsLoading)
+{
+    <div class="alert alert-info">Loading users...</div>
+}
+else
+{
+    <EditForm Model="Team" OnValidSubmit="CreateAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Team Name</label>
+                    <InputText class="form-control" @bind-Value="Team.Name" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Team Lead</label>
+                    <InputSelect class="form-select" @bind-Value="Team.TeamLeadId">
+                        <option value="">-- Select Team Lead --</option>
+                        @foreach (var u in Leads)
+                        {
+                            <option value="@u.Id">@u.Display</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Manager</label>
+                    <InputSelect class="form-select" @bind-Value="Team.ManagerId">
+                        <option value="">-- Select Manager --</option>
+                        @foreach (var u in Managers)
+                        {
+                            <option value="@u.Id">@u.Display</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Director</label>
+                    <InputSelect class="form-select" @bind-Value="Team.DirectorId">
+                        <option value="">-- Select Director --</option>
+                        @foreach (var u in Directors)
+                        {
+                            <option value="@u.Id">@u.Display</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            disabled="@IsBusy"
+                            @onclick="Cancel">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            disabled="@IsBusy">
+                        <i class="bi bi-check-circle me-1"></i>
+                        @(IsBusy ? "Creating..." : "Create")
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    private TeamView Team { get; set; } = new TeamView();
+
+    private bool IsBusy { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private string? Error { get; set; }
+
+    private List<UserOption> Leads { get; set; } = new();
+    private List<UserOption> Managers { get; set; } = new();
+    private List<UserOption> Directors { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDropdownsAsync();
+    }
+
+    private async Task LoadDropdownsAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            Error = null;
+
+            // ✅ Uses your real endpoints
+            var leads = await Http.GetFromJsonAsync<List<UserViewDto>>("api/user/leads", JsonOptions) ?? new();
+            var managers = await Http.GetFromJsonAsync<List<UserViewDto>>("api/user/managers", JsonOptions) ?? new();
+            var directors = await Http.GetFromJsonAsync<List<UserViewDto>>("api/user/directors", JsonOptions) ?? new();
+
+            Leads = ToOptions(leads);
+            Managers = ToOptions(managers);
+            Directors = ToOptions(directors);
+        }
+        catch (Exception ex)
+        {
+            Error = $"Failed to load dropdown data: {ex.Message}";
+            Leads = new();
+            Managers = new();
+            Directors = new();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private static List<UserOption> ToOptions(IEnumerable<UserViewDto> users)
+    {
+        return users
+            .Where(u => !string.IsNullOrWhiteSpace(u.Id))
+            // optional: skip deleted users in dropdowns
+            .Where(u => u.IsDeleted == false)
+            .Select(u => new UserOption
+            {
+                Id = u.Id!,
+                Display = BuildDisplay(u)
+            })
+            .OrderBy(u => u.Display)
+            .ToList();
+    }
+
+    private static string BuildDisplay(UserViewDto u)
+    {
+        var name = string.IsNullOrWhiteSpace(u.Name) ? "Unknown" : u.Name.Trim();
+        var email = string.IsNullOrWhiteSpace(u.Email) ? "" : $" ({u.Email.Trim()})";
+        return name + email;
+    }
+
+    private async Task CreateAsync()
+    {
+        // client-side validation (prevents BadRequest roundtrips)
+        if (string.IsNullOrWhiteSpace(Team.Name))
+        {
+            Error = "Team Name is required.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Team.TeamLeadId) ||
+            string.IsNullOrWhiteSpace(Team.ManagerId) ||
+            string.IsNullOrWhiteSpace(Team.DirectorId))
+        {
+            Error = "Please select Team Lead, Manager, and Director.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            // ✅ Matches your controller: POST api/Team
+            var response = await Http.PostAsJsonAsync("api/Team", Team);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+                Error = string.IsNullOrWhiteSpace(message)
+                    ? $"Create failed ({(int)response.StatusCode})"
+                    : message;
+                return;
+            }
+
+            Nav.NavigateTo("/teams");
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        Nav.NavigateTo("/teams");
+    }
+
+    // Dropdown option
+    private sealed class UserOption
+    {
+        public string Id { get; set; } = "";
+        public string Display { get; set; } = "";
+    }
+
+    // ✅ DTO that matches what your API commonly returns in views (Id/Name/Email/IsDeleted)
+    // For leads/managers/directors endpoints, if they return User entity instead of UserView,
+    // this still works as long as properties match (Id, Name, Email, IsDeleted).
+    private sealed class UserViewDto
+    {
+        public string? Id { get; set; }
+        public string? Name { get; set; }
+        public string? Email { get; set; }
+        public bool IsDeleted { get; set; }
+    }
+}

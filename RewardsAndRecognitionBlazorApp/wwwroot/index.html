@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RewardsAndRecognitionBlazorApp</title>
+    <base href="/" />
+    <link rel="stylesheet" href="css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="RewardsAndRecognitionBlazorApp.styles.css" rel="stylesheet" />
+    <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+ 
+</head>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // API base URL for fetch helper to use when relative paths are passed from Blazor
+    window.apiBaseUrl = "https://localhost:51332";
+</script>
+ 
+<script>
+    window.yearQuarterConfirmDelete = async function () {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'No, cancel!',
+            reverseButtons: true,
+            allowOutsideClick: true,
+            focusConfirm: false,
+            focusCancel: false
+        });
+ 
+        return result.isConfirmed === true;
+    }
+</script>
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/fetchWithCredentials.js"></script>
+    <script src="js/browserStorage.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script src="js/usersUi.js"></script>
+    <script>
+        // Development helper: remove initial loading placeholders and unregister service worker
+        (function () {
+            try {
+                // Remove loading placeholders inside #app so they don't remain visible when Blazor mounts
+                const app = document.getElementById('app');
+                if (app) {
+                    const loaders = app.querySelectorAll('.loading-progress, .loading-progress-text');
+                    loaders.forEach(n => n.remove());
+                }
+
+                // Unregister any service worker during development to avoid cached app shells causing duplicate UI
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+                }
+            }
+            catch (e) {
+                // swallow errors silently
+                console.warn('Dev cleanup script error', e);
+            }
+        })();
+    </script>
+</body>
+
+</html>

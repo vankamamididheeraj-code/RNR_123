@@ -1,0 +1,153 @@
+﻿@page "/categories/edit/{Id:guid}"
+@using System.Net.Http.Json
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject JsonSerializerOptions JsonOptions
+
+<h2 class="mb-3">
+    <i class="bi bi-pencil-square me-2"></i> Edit Category
+</h2>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert alert-danger">@Error</div>
+}
+
+@if (IsLoading)
+{
+    <div class="alert alert-info">Loading category...</div>
+}
+else if (Category is null)
+{
+    <div class="alert alert-warning">
+        Category not found.
+        <button class="btn btn-link p-0 ms-2" @onclick="BackToList">Back</button>
+    </div>
+}
+else
+{
+    <EditForm Model="Category" OnValidSubmit="SaveAsync">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <InputText class="form-control" @bind-Value="Category.Name" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <InputTextArea class="form-control" rows="3" @bind-Value="Category.Description" />
+                </div>
+
+                <div class="form-check form-switch mb-3">
+                    <InputCheckbox class="form-check-input" id="isActive" @bind-Value="Category.isActive" />
+                    <label class="form-check-label" for="isActive">Active</label>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            disabled="@IsBusy"
+                            @onclick="BackToList">
+                        Cancel
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary"
+                            disabled="@IsBusy">
+                        <i class="bi bi-check-circle me-1"></i>
+                        @(IsBusy ? "Saving..." : "Save")
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private CategoryView? Category { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+    private bool IsBusy { get; set; }
+    private string? Error { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            Error = null;
+
+            Category = await Http.GetFromJsonAsync<CategoryView>($"api/Category/{Id}", JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Category = null;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        if (Category is null) return;
+
+        if (string.IsNullOrWhiteSpace(Category.Name))
+        {
+            Error = "Name is required.";
+            return;
+        }
+
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            // Ensure correct id in payload
+            Category.Id = Id;
+
+            // ✅ Matches your controller: PUT api/category/{id}
+            var response = await Http.PutAsJsonAsync($"api/Category/{Id}", Category);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var msg = await response.Content.ReadAsStringAsync();
+                Error = string.IsNullOrWhiteSpace(msg)
+                    ? $"Update failed ({(int)response.StatusCode})"
+                    : msg;
+                return;
+            }
+
+            Nav.NavigateTo("/categories");
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void BackToList()
+    {
+        Nav.NavigateTo("/categories");
+    }
+}

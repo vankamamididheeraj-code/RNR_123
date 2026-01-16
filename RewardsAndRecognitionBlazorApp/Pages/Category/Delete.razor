@@ -1,0 +1,141 @@
+﻿@page "/categories/delete/{Id:guid}"
+@using System.Net.Http.Json
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject JsonSerializerOptions JsonOptions
+
+<h2 class="mb-3 text-danger">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> Delete Category
+</h2>
+
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <div class="alert alert-danger">@Error</div>
+}
+
+@if (IsLoading)
+{
+    <div class="alert alert-info">Loading category...</div>
+}
+else if (Category is null)
+{
+    <div class="alert alert-warning">
+        Category not found.
+        <button class="btn btn-link p-0 ms-2" @onclick="Back">Back</button>
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+
+            <p class="mb-3">
+                Are you sure you want to delete the following category?
+            </p>
+
+            <ul class="list-group mb-3">
+                <li class="list-group-item">
+                    <strong>Name:</strong> @Category.Name
+                </li>
+                <li class="list-group-item">
+                    <strong>Description:</strong>
+                    @(string.IsNullOrWhiteSpace(Category.Description) ? "-" : Category.Description)
+                </li>
+                <li class="list-group-item">
+                    <strong>Active:</strong>
+                    @(Category.isActive ? "Yes" : "No")
+                </li>
+                <li class="list-group-item">
+                    <strong>Created:</strong>
+                    @Category.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd")
+                </li>
+            </ul>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-secondary"
+                        disabled="@IsBusy"
+                        @onclick="Back">
+                    Cancel
+                </button>
+
+                <button class="btn btn-danger"
+                        disabled="@IsBusy"
+                        @onclick="DeleteAsync">
+                    <i class="bi bi-trash-fill me-1"></i>
+                    @(IsBusy ? "Deleting..." : "Delete")
+                </button>
+            </div>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+
+    private CategoryView? Category { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+    private bool IsBusy { get; set; }
+    private string? Error { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            Error = null;
+
+            // ✅ GET api/category/{id}
+            Category = await Http.GetFromJsonAsync<CategoryView>($"api/Category/{Id}", JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+            Category = null;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        try
+        {
+            IsBusy = true;
+            Error = null;
+
+            // ✅ Soft delete: DELETE api/category/{id}
+            var response = await Http.DeleteAsync($"api/Category/{Id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Error = $"Delete failed ({(int)response.StatusCode})";
+                return;
+            }
+
+            Nav.NavigateTo("/categories");
+        }
+        catch (Exception ex)
+        {
+            Error = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void Back()
+    {
+        Nav.NavigateTo("/categories");
+    }
+}

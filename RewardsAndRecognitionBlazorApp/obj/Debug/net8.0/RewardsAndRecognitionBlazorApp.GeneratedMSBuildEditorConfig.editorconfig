@@ -1,0 +1,149 @@
+is_global = true
+build_property.EnableAotAnalyzer = 
+build_property.EnableSingleFileAnalyzer = 
+build_property.EnableTrimAnalyzer = false
+build_property.IncludeAllContentForSelfExtract = 
+build_property.TargetFramework = net8.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = false
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = browser
+build_property.RootNamespace = RewardsAndRecognitionBlazorApp
+build_property.RootNamespace = RewardsAndRecognitionBlazorApp
+build_property.ProjectDir = C:\Users\VV018423\source\repos\Intern-Projects\2026\RNR_RewardsAndRecognition\RewardsAndRecognitionBlazorApp\
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = false
+build_property.RazorLangVersion = 8.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = C:\Users\VV018423\source\repos\Intern-Projects\2026\RNR_RewardsAndRecognition\RewardsAndRecognitionBlazorApp
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 8.0
+build_property.EnableCodeStyleSeverity = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/App.razor]
+build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Account/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dpbi5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Account/LogOut.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dPdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Category/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcQ3JlYXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Category/Delete.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcRGVsZXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Category/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcRWRpdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Category/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Home/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZVxJbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Nomination/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Nomination/Delete.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxEZWxldGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Nomination/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxFZGl0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Nomination/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxJbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Team/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Team/Delete.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxEZWxldGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Team/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxFZGl0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Team/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxJbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/User/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxDcmVhdGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/User/Delete.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxEZWxldGUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/User/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxFZGl0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/User/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxJbmRleC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/Weather.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV2VhdGhlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Create.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcQ3JlYXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Delete.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcRGVsZXRlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Edit.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcRWRpdC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Index.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcSW5kZXgucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Shared/EmptyLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEVtcHR5TGF5b3V0LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Shared/Pager.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFBhZ2VyLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-s9l0jwog18
+
+[C:/Users/VV018423/source/repos/Intern-Projects/2026/RNR_RewardsAndRecognition/RewardsAndRecognitionBlazorApp/Layout/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-uux3bk2j9w

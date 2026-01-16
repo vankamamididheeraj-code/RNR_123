@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "RewardsAndRecognitionBlazorApp\\RewardsAndRecognitionBlazorApp.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

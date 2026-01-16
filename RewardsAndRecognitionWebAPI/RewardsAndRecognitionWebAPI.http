@@ -1,0 +1,6 @@
+@RewardsAndRecognitionWebAPI_HostAddress = http://localhost:5104
+
+GET {{RewardsAndRecognitionWebAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
