@@ -1,0 +1,269 @@
+@page "/dashboard/admin"
+@layout EmptyLayout
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject HttpClient Http
+@inject UserSession Session
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@if (!Session.IsLoggedIn || Session.Role != "Admin")
+{
+    <p>Access denied. Please log in as Admin.</p>
+}
+else
+{
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard/admin">
+            <i class="bi bi-stars"></i> RewardsAndRecognition
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard/admin"><i class="bi bi-house-door"></i> Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/users"><i class="bi bi-people"></i> Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/teams"><i class="bi bi-diagram-3"></i> Teams</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/yearquarter"><i class="bi bi-calendar3"></i> Year Quarter</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/categories"><i class="bi bi-tags"></i> Category</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <button class="nav-link btn btn-link text-white" @onclick="HandleLogout" style="text-decoration: none;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+        }
+ 
+        .hero-section {
+            text-align: center;
+            padding: 100px 20px 60px;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border-radius: 20px;
+        }
+ 
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+ 
+        .hero-subtitle {
+            font-size: 1.2rem;
+            max-width: 650px;
+            margin: 0 auto;
+            color: #e0e0e0;
+        }
+ 
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            padding: 60px 20px 40px;
+            background: linear-gradient(to bottom, #f9f9f9, #f0f4ff);
+        }
+ 
+        .feature-box {
+            width: 300px;
+            padding: 30px 25px;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+ 
+            .feature-box:hover {
+                transform: scale(1.05);
+                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            }
+ 
+        .feature-icon {
+            font-size: 2.8rem;
+            margin-bottom: 12px;
+        }
+ 
+        .feature-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+ 
+        .feature-desc {
+            font-size: 0.95rem;
+            color: #555;
+        }
+ 
+        .stats-section {
+            padding: 40px 20px;
+            background: white;
+            text-align: center;
+        }
+ 
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+ 
+        .stat-box {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 150px;
+        }
+ 
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+ 
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+        }
+    </style>
+ 
+    <div class="hero-section">
+        <h1 class="hero-title">Welcome, Admin</h1>
+        <h2>Build to Recognize Tomorrow's Leaders</h2>
+        <p class="hero-subtitle">
+            Come let us celebrate a moment where Talent meets SpotLight!!!
+        </p>
+    </div>
+ 
+    @if (dashboard != null)
+    {
+        <div class="stats-section">
+            <h2>Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-number">@dashboard.TotalNominations</div>
+                    <div class="stat-label">Total Nominations</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">@dashboard.ApprovedNominations</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">@dashboard.RejectedNominations</div>
+                    <div class="stat-label">Rejected</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number">@dashboard.PendingApprovals</div>
+                    <div class="stat-label">Pending Approvals</div>
+                </div>
+            </div>
+        </div>
+    }
+ 
+    <div class="features">
+        <div class="feature-box" style="border-top: 5px solid #6f42c1;">
+            <div class="feature-icon">🌟</div>
+            <div class="feature-title">Nominate Talents</div>
+            <div class="feature-desc">
+                Team Leads can effortlessly nominate top performers every quarter.
+            </div>
+        </div>
+ 
+        <div class="feature-box" style="border-top: 5px solid #20c997;">
+            <div class="feature-icon">✅</div>
+            <div class="feature-title">Multi-Level Approvals</div>
+            <div class="feature-desc">
+                Transparent workflows via Manager & Tower Lead approvals.
+            </div>
+        </div>
+ 
+        <div class="feature-box" style="border-top: 5px solid #fd7e14;">
+            <div class="feature-icon">📈</div>
+            <div class="feature-title">Recognition Dashboard</div>
+            <div class="feature-desc">
+                Approved recognitions are displayed in a dynamic visual timeline.
+            </div>
+        </div>
+ 
+        <div class="feature-box" style="border-top: 5px solid #dc3545;">
+            <div class="feature-icon">🏆</div>
+            <div class="feature-title">Award Categories</div>
+            <div class="feature-desc">
+                Celebrate achievements across categories like Innovation & Leadership.
+            </div>
+        </div>
+ 
+        <div class="feature-box" style="border-top: 5px solid #17a2b8;">
+            <div class="feature-icon">📅</div>
+            <div class="feature-title">Quarter-Based System</div>
+            <div class="feature-desc">
+                Track and manage nominations per quarter effortlessly.
+            </div>
+        </div>
+ 
+        <div class="feature-box" style="border-top: 5px solid #ffc107;">
+            <div class="feature-icon">🔔</div>
+            <div class="feature-title">Live Notifications</div>
+            <div class="feature-desc">
+                Get notified on nomination status changes and approvals.
+            </div>
+        </div>
+    </div>
+    }
+
+@code {
+    private DashboardView? dashboard;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Session.InitializeAsync(JS, forceRefresh: true);
+
+        if (!Session.IsLoggedIn || Session.Role != "Admin")
+        {
+            Nav.NavigateTo("/");
+            return;
+        }
+
+        try
+        {
+            dashboard = await Http.GetFromJsonAsync<DashboardView>("api/dashboard");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading dashboard: {ex.Message}");
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirmLogout");
+        if (confirmed)
+        {
+            await Session.ClearSessionAsync(JS);
+            Nav.NavigateTo("/", forceLoad: true);
+        }
+    }
+}

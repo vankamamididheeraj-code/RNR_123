@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Http;
+using Microsoft.JSInterop;
 //using RewardsAndRecognitionRepository.Data;
 //using RewardsAndRecognitionRepository.Models;
 
@@ -43,6 +44,7 @@ namespace RewardsAndRecognitionBlazorApp
             builder.Services.AddSingleton(new System.Text.Json.JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
                 Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
             });
 

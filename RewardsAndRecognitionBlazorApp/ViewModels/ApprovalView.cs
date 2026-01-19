@@ -10,8 +10,8 @@ namespace RewardsAndRecognitionBlazorApp.ViewModels
         public string ApproverId { get; set; }
         public UserView Approver { get; set; }
         
-        public ApprovalView Action { get; set; }
-        public ApprovalView Level { get; set; }
+        public ApprovalAction Action { get; set; }
+        public ApprovalLevel Level { get; set; }
  
         public DateTime ActionAt { get; set; } = DateTime.UtcNow;
         public string? Remarks { get; set; }

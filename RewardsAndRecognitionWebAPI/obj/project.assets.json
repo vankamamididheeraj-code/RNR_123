@@ -5028,23 +5028,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\VV018423\\.nuget\\packages\\": {},
+    "C:\\Users\\PK018426\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\VV018423\\source\\repos\\Intern-Projects\\2026\\RNR_RewardsAndRecognition\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
+      "projectUniqueName": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
       "projectName": "RewardsAndRecognitionWebAPI",
-      "projectPath": "C:\\Users\\VV018423\\source\\repos\\Intern-Projects\\2026\\RNR_RewardsAndRecognition\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
-      "packagesPath": "C:\\Users\\VV018423\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\VV018423\\source\\repos\\Intern-Projects\\2026\\RNR_RewardsAndRecognition\\RewardsAndRecognitionWebAPI\\obj\\",
+      "projectPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
+      "packagesPath": "C:\\Users\\PK018426\\.nuget\\packages\\",
+      "outputPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\VV018423\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\PK018426\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -5059,8 +5059,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\VV018423\\source\\repos\\Intern-Projects\\2026\\RNR_RewardsAndRecognition\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
-              "projectPath": "C:\\Users\\VV018423\\source\\repos\\Intern-Projects\\2026\\RNR_RewardsAndRecognition\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj"
+            "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
+              "projectPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj"
             }
           }
         }

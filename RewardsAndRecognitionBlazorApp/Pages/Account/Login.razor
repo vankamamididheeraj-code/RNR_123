@@ -2,6 +2,7 @@
 @layout EmptyLayout
 @using System.ComponentModel.DataAnnotations
 @using RewardsAndRecognitionBlazorApp.Shared
+@using RewardsAndRecognitionBlazorApp.ViewModels
 
 <style>
     body {
@@ -67,7 +68,7 @@
     }
 </style>
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<link href="css/all.min.css" rel="stylesheet" />
 
 <div class="main-card">
     <!-- Left Section -->
@@ -115,61 +116,3 @@
         </EditForm>
     </div>
 </div>
-@* 
-@code {
-    private LoginModel loginModel = new();
-    private bool isSubmitting = false;
-    private string errorMessage;
-    private bool showPassword = false;
-
-    private string passwordInputType => showPassword ? "text" : "password";
-    private string passwordToggleIcon => showPassword ? "fa-eye-slash" : "fa-eye";
-
-    private async Task HandleLogin()
-    {
-        isSubmitting = true;
-        errorMessage = null;
-
-        try
-        {
-            // Replace with your actual API endpoint for login
-            var response = await Http.PostAsJsonAsync("api/account/login", loginModel);
-
-            if (response.IsSuccessStatusCode)
-            {
-                Navigation.NavigateTo("/");
-            }
-            else
-            {
-                errorMessage = "Invalid login attempt.";
-            }
-        }
-        catch
-        {
-            errorMessage = "An error occurred during login.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
-    }
-
-    private void TogglePasswordVisibility()
-    {
-        showPassword = !showPassword;
-    }
-
-    public class LoginModel
-    {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-
-        [Required]
-        [DataType(DataType.Password)]
-        public string Password { get; set; }
-
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
-    }
-} *@

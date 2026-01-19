@@ -85,8 +85,10 @@ namespace RewardsAndRecognitionWebAPI
                     // Prevent System.Text.Json exception on cycles in EF Core navigation properties
                     opts.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
                     opts.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-                        // Serialize enums as strings so the Blazor client (which uses string enums) can deserialize
-                        opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+                    // Serialize enums as strings so the Blazor client (which uses string enums) can deserialize
+                    opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+                    // Use camelCase for property names
+                    opts.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
                 });
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -156,6 +158,13 @@ namespace RewardsAndRecognitionWebAPI
             builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
             builder.Services.AddScoped<INominationRepo, NominationRepo>();
             builder.Services.AddScoped<IApprovalRepo, ApprovalRepo>();
+
+            // Configure EmailSettings from appsettings.json
+            builder.Services.Configure<RewardsAndRecognitionRepository.Models.EmailSettings>(
+                builder.Configuration.GetSection("EmailSettings"));
+            
+            // Register EmailService
+            builder.Services.AddScoped<RewardsAndRecognitionRepository.Service.IEmailService, EmailService>();
 
 
             var app = builder.Build();

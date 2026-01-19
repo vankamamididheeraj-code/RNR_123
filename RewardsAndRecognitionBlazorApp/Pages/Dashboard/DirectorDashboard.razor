@@ -1,0 +1,440 @@
+@page "/dashboard/director"
+@layout RewardsAndRecognitionBlazorApp.Shared.EmptyLayout
+@inject HttpClient Http
+@inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+ 
+<PageTitle>Director Dashboard</PageTitle>
+ 
+@if (!IsInitialized)
+{
+    <p>Loading...</p>
+}
+else if (!Session.IsLoggedIn || Session.Role != "Director")
+{
+    <p>Access denied. Please log in as Director.</p>
+}
+else
+{
+<DirectorNavBar ActivePage="Dashboard" />
+
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap">
+        <h2 class="mb-0"><i class="bi bi-person-badge"></i> Director Dashboard</h2>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div>
+                <label for="yearDropdown" class="form-label mb-1">Select Year :</label>
+                <select @onchange="OnYearChangedAsync" value="@SelectedYear" class="form-select form-select-sm">
+                    <option value="">-- Select Year --</option>
+                    @foreach (var year in Years)
+                    {
+                        <option value="@year">@year</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label for="quarterDropdown" class="form-label mb-1">Select Quarter :</label>
+                <select @onchange="OnQuarterChangedAsync" value="@SelectedQuarterId" disabled="@(string.IsNullOrEmpty(SelectedYear))" class="form-select form-select-sm">
+                    <option value="">-- Select Quarter --</option>
+                    @foreach (var quarter in Quarters)
+                    {
+                        <option value="@quarter.Id">@quarter.Name</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+ 
+    <style>
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            transition: transform 0.2s ease;
+            height: 100%;
+            text-decoration: none;
+        }
+ 
+        .dashboard-card:hover {
+            transform: translateY(-3px);
+            text-decoration: none;
+        }
+ 
+        .dashboard-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+        }
+ 
+        .dashboard-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+ 
+        .clickable-card {
+            text-decoration: none;
+        }
+ 
+        .text-blue {
+            color: #007bff;
+        }
+    </style>
+ 
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <a href="javascript:void(0);" @onclick='() => NavigateToNominations("all")' class="clickable-card">
+                <div class="dashboard-card">
+                    <div class="dashboard-title">Total Nominations</div>
+                    <div class="dashboard-value text-blue">@TotalNominations</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="javascript:void(0);" @onclick='() => NavigateToNominations("pending")' class="clickable-card">
+                <div class="dashboard-card">
+                    <div class="dashboard-title">Pending Reviews</div>
+                    <div class="dashboard-value text-warning">@PendingReviews</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="javascript:void(0);" @onclick='() => NavigateToNominations("directorapproved")' class="clickable-card">
+                <div class="dashboard-card">
+                    <div class="dashboard-title">Final Approved</div>
+                    <div class="dashboard-value text-success">@FinalApproved</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="javascript:void(0);" @onclick='() => NavigateToNominations("directorrejected")' class="clickable-card">
+                <div class="dashboard-card">
+                    <div class="dashboard-title">Final Rejected</div>
+                    <div class="dashboard-value text-danger">@FinalRejected</div>
+                </div>
+            </a>
+        </div>
+    </div>
+ 
+    <h4 class="mt-5 mb-3 text-primary"><i class="bi bi-bar-chart-line-fill"></i> Team Wise Statistics</h4>
+    <div id="directorChartsContainer" class="row row-cols-1 row-cols-md-2 g-4 mb-5">
+        <div class="col">
+            <div class="dashboard-card text-center p-4">
+                <h5 class="text-muted mb-2">📊 Analytics Coming Soon</h5>
+                <p class="mb-0">Team-wise breakdown will be available once the analytics controller is implemented.</p>
+            </div>
+        </div>
+    </div>
+ 
+    <h4 class="mt-5 mb-4"><i class="bi bi-people-fill me-2"></i>Teams Under You</h4>
+    <div class="mb-4 d-flex align-items-center gap-3">
+        <label class="form-label mb-0"><strong>Select Team:</strong></label>
+        <select @onchange="OnTeamSelected" class="form-select w-auto">
+            <option value="">-- Choose a team --</option>
+            @foreach (var team in DirectorTeams)
+            {
+                <option value="@team.TeamId">@team.TeamName</option>
+            }
+        </select>
+    </div>
+
+    @if (ShowTeamNominationsModal)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Nominations from @SelectedTeamName</h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (TeamNominations == null)
+                        {
+                            <p>Loading...</p>
+                        }
+                        else if (TeamNominations.Any())
+                        {
+                            <div class="mb-3">
+                                <input type="text" @bind="SearchText" @bind:event="oninput" class="form-control w-50" placeholder="Search by Nominee Name..." />
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-hover">
+                                    <thead class="table-primary text-center">
+                                        <tr>
+                                            <th>S.no</th>
+                                            <th>Nominee</th>
+                                            <th>Category</th>
+                                            <th>Description</th>
+                                            <th>Achievements</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            int i = 1;
+                                            var filteredNominations = string.IsNullOrWhiteSpace(SearchText)
+                                                ? TeamNominations
+                                                : TeamNominations.Where(n => n.NomineeName.Contains(SearchText, StringComparison.OrdinalIgnoreCase)).ToList();
+                                        }
+                                        @foreach (var nom in filteredNominations)
+                                        {
+                                            <tr>
+                                                <td class="text-center">@i</td>
+                                                <td>@nom.NomineeName</td>
+                                                <td>@nom.CategoryName</td>
+                                                <td>@nom.Description</td>
+                                                <td>@nom.Achievements</td>
+                                                <td>
+                                                    @if (nom.Status == "DirectorApproved")
+                                                    {
+                                                        <span class="badge bg-success">DirectorApproved</span>
+                                                    }
+                                                    else if (nom.Status == "DirectorRejected")
+                                                    {
+                                                        <span class="badge bg-danger">DirectorRejected</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">@nom.Status</span>
+                                                    }
+                                                </td>
+                                                <td>@nom.CreatedAt</td>
+                                            </tr>
+                                            i++;
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info text-center">
+                                <i class="bi bi-info-circle"></i> No nominations found for this team.
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+ 
+@code {
+    private List<int> Years = new();
+    private List<QuarterView> Quarters = new();
+    private string SelectedYear = "";
+    private string SelectedQuarterId = "";
+    private int TotalNominations;
+    private int PendingReviews;
+    private int FinalApproved;
+    private int FinalRejected;
+    private string ActiveQuarterId = "";
+    private bool IsInitialized = false;
+    private List<TeamView> DirectorTeams = new();
+    private bool ShowTeamNominationsModal = false;
+    private List<TeamNominationView> TeamNominations = new();
+    private string SelectedTeamName = "";
+    private string SearchText = "";
+ 
+    protected override async Task OnInitializedAsync()
+    {
+        await Session.InitializeAsync(JS, forceRefresh: true);
+        IsInitialized = true;
+        await LoadYears();
+        await LoadDirectorTeams();
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDirectorTeams()
+    {
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "https://localhost:51332/api/Dashboard/Director/Teams",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            DirectorTeams = System.Text.Json.JsonSerializer.Deserialize<List<TeamView>>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            ) ?? new List<TeamView>();
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+        }
+    }
+
+    private async Task OnTeamSelected(ChangeEventArgs e)
+    {
+        var teamId = e.Value?.ToString() ?? "";
+        if (string.IsNullOrEmpty(teamId) || string.IsNullOrEmpty(SelectedQuarterId))
+        {
+            return;
+        }
+
+        var selectedTeam = DirectorTeams.FirstOrDefault(t => t.TeamId == teamId);
+        SelectedTeamName = selectedTeam?.TeamName ?? "";
+        
+        ShowTeamNominationsModal = true;
+        TeamNominations = null;
+        SearchText = "";
+
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"https://localhost:51332/api/Dashboard/Team/Nominations?teamId={teamId}&yearQuarterId={SelectedQuarterId}",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            TeamNominations = System.Text.Json.JsonSerializer.Deserialize<List<TeamNominationView>>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            ) ?? new List<TeamNominationView>();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            TeamNominations = new List<TeamNominationView>();
+        }
+    }
+
+    private void CloseModal()
+    {
+        ShowTeamNominationsModal = false;
+        TeamNominations = new();
+        SearchText = "";
+    }
+ 
+    private async Task LoadYears()
+    {
+        try
+        {
+            Years = await Http.GetFromJsonAsync<List<int>>("api/yearquarter/years") ?? new List<int>();
+        }
+        catch (Exception)
+        {
+            // Handle error
+        }
+    }
+ 
+    private async Task OnYearChangedAsync(ChangeEventArgs e)
+    {
+        SelectedYear = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrEmpty(SelectedYear))
+        {
+            await LoadQuarters();
+        }
+        else
+        {
+            Quarters.Clear();
+            SelectedQuarterId = "";
+        }
+        await LoadDashboardData();
+    }
+ 
+    private async Task LoadQuarters()
+    {
+        try
+        {
+            var quarters = await Http.GetFromJsonAsync<List<QuarterView>>($"api/yearquarter/quarters/{SelectedYear}") ?? new List<QuarterView>();
+            Quarters = quarters;
+        }
+        catch (Exception)
+        {
+            // Handle error
+        }
+    }
+ 
+    private async Task OnQuarterChangedAsync(ChangeEventArgs e)
+    {
+        SelectedQuarterId = e.Value?.ToString() ?? "";
+        await LoadDashboardData();
+    }
+ 
+    private async Task LoadDashboardData()
+    {
+        if (string.IsNullOrEmpty(SelectedQuarterId)) return;
+ 
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"https://localhost:51332/api/Dashboard/Director?yearQuarterId={SelectedQuarterId}",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            var data = System.Text.Json.JsonSerializer.Deserialize<DirectorDashboardView>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+            
+            if (data != null)
+            {
+                TotalNominations = data.TotalNominations;
+                PendingReviews = data.PendingReviews;
+                FinalApproved = data.FinalApproved;
+                FinalRejected = data.FinalRejected;
+                ActiveQuarterId = SelectedQuarterId;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+        }
+    }
+ 
+    private void NavigateToNominations(string filter)
+    {
+        if (string.IsNullOrEmpty(SelectedQuarterId))
+        {
+            return;
+        }
+        Nav.NavigateTo($"/nomination/index?filter={filter}&yearQuarterId={SelectedQuarterId}");
+    }
+
+    public class QuarterView
+    {
+        public string? Id { get; set; }
+        public string? Name { get; set; }
+    }
+ 
+    public class DirectorDashboardView
+    {
+        public int TotalNominations { get; set; }
+        public int PendingReviews { get; set; }
+        public int FinalApproved { get; set; }
+        public int FinalRejected { get; set; }
+    }
+
+    public class TeamView
+    {
+        public string? TeamId { get; set; }
+        public string? TeamName { get; set; }
+    }
+
+    public class TeamNominationView
+    {
+        public string? NomineeName { get; set; }
+        public string? CategoryName { get; set; }
+        public string? Description { get; set; }
+        public string? Achievements { get; set; }
+        public string? Status { get; set; }
+        public string? CreatedAt { get; set; }
+    }
+}

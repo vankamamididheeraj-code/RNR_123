@@ -49,6 +49,29 @@ namespace RewardsAndRecognitionBlazorApp.ViewModels
             _initialized = true;
         }
 
+        public async Task ClearSessionAsync(IJSRuntime jsRuntime)
+        {
+            _jsRuntime ??= jsRuntime;
+            
+            if (_jsRuntime != null)
+            {
+                try
+                {
+                    await _jsRuntime.InvokeVoidAsync("browserStorage.removeItem", "userId");
+                    await _jsRuntime.InvokeVoidAsync("browserStorage.removeItem", "role");
+                    await _jsRuntime.InvokeVoidAsync("browserStorage.removeItem", "authToken");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to clear session: {ex.Message}");
+                }
+            }
+
+            _userId = null;
+            _role = null;
+            _initialized = false;
+        }
+
         public bool IsLoggedIn => !string.IsNullOrWhiteSpace(_userId);
     }
 }

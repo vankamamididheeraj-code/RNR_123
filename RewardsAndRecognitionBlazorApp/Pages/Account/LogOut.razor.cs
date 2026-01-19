@@ -11,6 +11,7 @@ namespace RewardsAndRecognitionBlazorApp.Pages.Account
     {
         private bool isProcessing;
         private bool hasLoggedOut;
+        private bool isUserLoggedIn;
 
         [Inject] private HttpClient Http { get; set; }
         [Inject] private NavigationManager Navigation { get; set; }
@@ -18,10 +19,13 @@ namespace RewardsAndRecognitionBlazorApp.Pages.Account
         [Inject] private IJSRuntime JS { get; set; }
         [Inject] private RewardsAndRecognitionBlazorApp.Services.BrowserAuthStateProvider AuthProvider { get; set; }
         [Inject] private Microsoft.AspNetCore.Components.Authorization.AuthenticationStateProvider AuthStateProvider { get; set; }
+        [Inject] private RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session { get; set; }
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             Http.BaseAddress = new Uri("http://127.0.0.1:5104/");
+            await Session.InitializeAsync(JS);
+            isUserLoggedIn = Session.IsLoggedIn;
         }
 
         private async Task OnLogoutClicked()

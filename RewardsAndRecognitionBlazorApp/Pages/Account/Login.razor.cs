@@ -179,6 +179,7 @@ namespace RewardsAndRecognitionBlazorApp.Pages.Account
 
                 // Use fetch with credentials so cookies are set in the browser
                 var jsResp = await JS.InvokeAsync<JsonElement>("fetchWithCredentials", "POST", "api/account/login", loginModel);
+                LoginResultDto loginResult = null;
                 try
                 {
                     var ok = jsResp.GetProperty("ok").GetBoolean();
@@ -188,7 +189,7 @@ namespace RewardsAndRecognitionBlazorApp.Pages.Account
                         var text = jsResp.GetProperty("text").GetString() ?? string.Empty;
                         try
                         {
-                            var loginResult = System.Text.Json.JsonSerializer.Deserialize<LoginResultDto>(text, JsonOptions);
+                            loginResult = System.Text.Json.JsonSerializer.Deserialize<LoginResultDto>(text, JsonOptions);
                             if (loginResult != null)
                             {
                                 // Let the auth provider persist session and notify state changes
@@ -224,8 +225,31 @@ namespace RewardsAndRecognitionBlazorApp.Pages.Account
                         }
 
                         Logger.LogInformation("User logged in via API.");
-                        // Navigate to the Users page after successful login
-                        Navigation.NavigateTo("/users");
+                        // Navigate based on user role
+                        if (loginResult?.Role == "Admin")
+                        {
+                            Navigation.NavigateTo("/dashboard/admin", forceLoad: true);
+                        }
+                        else if (loginResult?.Role == "Manager")
+                        {
+                            Navigation.NavigateTo("/dashboard/manager", forceLoad: true);
+                        }
+                        else if (loginResult?.Role == "Director")
+                        {
+                            Navigation.NavigateTo("/dashboard/director", forceLoad: true);
+                        }
+                        else if (loginResult?.Role == "TeamLead" || loginResult?.Role == "Team Lead")
+                        {
+                            Navigation.NavigateTo("/dashboard/teamlead", forceLoad: true);
+                        }
+                        else if (loginResult?.Role == "Employee")
+                        {
+                            Navigation.NavigateTo("/dashboard/employee", forceLoad: true);
+                        }
+                        else
+                        {
+                            Navigation.NavigateTo("/", forceLoad: true);
+                        }
                         return;
                     }
                 }

@@ -1,0 +1,238 @@
+@page "/nomination/review/{id:guid}"
+@layout EmptyLayout
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Manager,Director,TeamLead")]
+@using System.Net.Http.Json
+@using System.Text.Json
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@using Microsoft.AspNetCore.Components.Forms
+@inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
+@inject HttpClient Http
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject JsonSerializerOptions JsonOptions
+
+<PageTitle>Review Nomination</PageTitle>
+
+<RoleBasedNavBar />
+
+<div class="container mt-4">
+    @if (isLoading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (nomination == null)
+    {
+        <div class="alert alert-danger">
+            <h4>Nomination Not Found</h4>
+            <p>The nomination you're trying to review doesn't exist or has been deleted.</p>
+            <a href="/nominations" class="btn btn-primary">Back to Nominations</a>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="bi bi-award"></i> Review Nomination</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="fw-bold">Nominee:</label>
+                        <p>@(nomination.Nominee?.Email ?? nomination.NomineeId)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold">Nominator:</label>
+                        <p>@(nomination.Nominator?.Email ?? nomination.NominatorId)</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="fw-bold">Category:</label>
+                        <p>@(nomination.Category?.Name ?? nomination.CategoryId.ToString())</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold">Year/Quarter:</label>
+                        <p>@GetYearQuarterText()</p>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Description:</label>
+                    <p class="border p-3 bg-light rounded">@nomination.Description</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Achievements:</label>
+                    <p class="border p-3 bg-light rounded">@nomination.Achievements</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Current Status:</label>
+                    <span class="badge @GetStatusBadgeClass()">@nomination.Status</span>
+                </div>
+
+                <hr />
+
+                <EditForm Model="@reviewRequest" OnValidSubmit="HandleSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label fw-bold">Remarks:</label>
+                        <InputTextArea id="remarks" class="form-control" @bind-Value="reviewRequest.Remarks" rows="4" placeholder="Enter your remarks (optional)"></InputTextArea>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">
+                            @errorMessage
+                        </div>
+                    }
+
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-secondary" @onclick="Cancel">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                        <button type="button" class="btn btn-danger" @onclick='() => SubmitReview("Rejected")' disabled="@isSubmitting">
+                            <i class="bi bi-x-circle-fill"></i> @(isSubmitting && selectedAction == "Rejected" ? "Rejecting..." : "Reject")
+                        </button>
+                        <button type="button" class="btn btn-success" @onclick='() => SubmitReview("Approved")' disabled="@isSubmitting">
+                            <i class="bi bi-check-circle-fill"></i> @(isSubmitting && selectedAction == "Approved" ? "Approving..." : "Approve")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private NominationView? nomination;
+    private ReviewRequest reviewRequest = new ReviewRequest();
+    private bool isLoading = true;
+    private bool isSubmitting = false;
+    private string? errorMessage;
+    private string? selectedAction;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Session.InitializeAsync(JS);
+        await LoadNomination();
+        isLoading = false;
+    }
+
+    private async Task LoadNomination()
+    {
+        try
+        {
+            nomination = await Http.GetFromJsonAsync<NominationView>($"api/nomination/{Id}", JsonOptions);
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading nomination:", ex.ToString());
+            nomination = null;
+        }
+    }
+
+    private async Task SubmitReview(string action)
+    {
+        if (isSubmitting) return;
+
+        selectedAction = action;
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            reviewRequest.Action = action;
+            reviewRequest.UserId = Session.UserId ?? "";
+
+            if (string.IsNullOrEmpty(reviewRequest.UserId))
+            {
+                errorMessage = "User session is invalid. Please log in again.";
+                isSubmitting = false;
+                return;
+            }
+
+            // Log the request for debugging
+            await JS.InvokeVoidAsync("console.log", "Review Request:", reviewRequest);
+
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "POST",
+                $"https://localhost:51332/api/nomination/{Id}/review",
+                reviewRequest
+            );
+
+            var ok = result.GetProperty("ok").GetBoolean();
+            
+            if (ok)
+            {
+                var responseText = result.GetProperty("text").GetString() ?? "";
+                var response = JsonSerializer.Deserialize<JsonElement>(responseText);
+                var message = response.GetProperty("message").GetString();
+
+                await JS.InvokeVoidAsync("alert", message);
+                Nav.NavigateTo("/nominations");
+            }
+            else
+            {
+                var errorText = result.GetProperty("text").GetString() ?? "Unknown error occurred";
+                errorMessage = $"Error: {errorText}";
+                await JS.InvokeVoidAsync("console.error", "Review error response:", errorText);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"An error occurred: {ex.Message}";
+            await JS.InvokeVoidAsync("console.error", "Error submitting review:", ex.ToString());
+        }
+        finally
+        {
+            isSubmitting = false;
+            selectedAction = null;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        // This is called when form is submitted via Enter key or form submit
+        // We handle submission via button clicks instead
+    }
+
+    private void Cancel()
+    {
+        Nav.NavigateTo("/nominations");
+    }
+
+    private string GetYearQuarterText()
+    {
+        if (nomination?.YearQuarter != null)
+        {
+            return $"{nomination.YearQuarter.Year} Q{nomination.YearQuarter.Quarter}";
+        }
+        return nomination?.YearQuarterId.ToString() ?? "";
+    }
+
+    private string GetStatusBadgeClass()
+    {
+        if (nomination == null) return "bg-secondary";
+
+        return nomination.Status.ToString().ToLower() switch
+        {
+            var s when s.Contains("approved") => "bg-success",
+            var s when s.Contains("rejected") => "bg-danger",
+            var s when s.Contains("pending") => "bg-warning",
+            _ => "bg-secondary"
+        };
+    }
+}

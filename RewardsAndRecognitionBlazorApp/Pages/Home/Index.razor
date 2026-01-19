@@ -1,8 +1,13 @@
-@page "/home"
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "Admin")]
+@page "/"
+@layout EmptyLayout
+@inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
+@inject IJSRuntime JS
+@* @using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")] *@
 
 <PageTitle>Home</PageTitle>
+
+<HomeNavBar />
 
 <style>
     body { font-family: 'Segoe UI', sans-serif; }
@@ -58,7 +63,7 @@
 </style>
 
 <div class="hero-section">
-    <h1 class="hero-title">Built to Recognize Tomorrow’s Leaders</h1>
+    <h1 class="hero-title">Built to Recognize Tomorrow's Leaders</h1>
     <p class="hero-subtitle">
         Come let us celebrate a moment where Talent meets Spotlight!
     </p>
@@ -101,3 +106,10 @@
         <div class="feature-desc">Get notified on nomination status changes and approvals.</div>
     </div>
 </div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Session.InitializeAsync(JS);
+    }
+}

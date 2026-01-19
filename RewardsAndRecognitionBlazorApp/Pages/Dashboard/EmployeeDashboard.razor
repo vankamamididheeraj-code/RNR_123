@@ -1,0 +1,206 @@
+@page "/dashboard/employee"
+@layout RewardsAndRecognitionBlazorApp.Shared.EmptyLayout
+@inject HttpClient Http
+@inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+ 
+<PageTitle>Employee Dashboard</PageTitle>
+ 
+@if (!IsInitialized)
+{
+    <p>Loading...</p>
+}
+else if (!Session.IsLoggedIn)
+{
+    <p>Access denied. Please log in.</p>
+}
+else
+{
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard/employee">
+            <i class="bi bi-stars"></i> RewardsAndRecognition
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard/employee"><i class="bi bi-house-door"></i> Dashboard</a>
+                </li>
+                @* <li class="nav-item">
+                    <a class="nav-link" href="/nominations"><i class="bi bi-award"></i> Nominations</a>
+                </li> *@
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <button class="nav-link btn btn-link text-white" @onclick="HandleLogout" style="text-decoration: none;">
+                        <i class="bi bi-box-arrow-right"></i> Logout
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <h2 class="d-flex justify-content-between align-items-center mb-3" style="font-size: 1.4rem; font-weight: 600;">
+        <span class="text-primary">Employee Dashboard</span>
+
+        @if (!string.IsNullOrEmpty(ActiveQuarterName))
+        {
+            <span class="quarter-card shadow-sm" title="Closes At: @ActiveQuarterCloseDate">
+                <span>@ActiveQuarterName, @ActiveYearName</span>
+                @if (!string.IsNullOrEmpty(ActiveQuarterCloseDate))
+                {
+                    <br />
+                    <small style="font-size: 0.75rem; opacity: 0.9;">Closes: @ActiveQuarterCloseDate</small>
+                }
+            </span>
+        }
+    </h2>
+
+    <style>
+        .quarter-card {
+            background-color: #eef4ff;
+            color: #0a3c8a;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-left: 4px solid #0d6efd;
+            transition: all 0.3s ease-in-out;
+            white-space: nowrap;
+        }
+
+        .quarter-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f1f5ff;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+        }
+    </style>
+
+    @if (Nominations == null || !Nominations.Any())
+    {
+        <div class="alert alert-info mt-3">
+            You haven't submitted or received any nominations yet.
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover mt-3">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Nominee</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Nominations.Count; i++)
+                {
+                    var n = Nominations[i];
+                    <tr>
+                        <td>@(i + 1)</td>
+                        <td>@n.NomineeName</td>
+                        <td>@n.CategoryName</td>
+                        <td>
+                            <span class="badge bg-secondary">@n.Status</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+ 
+@code {
+    private bool IsInitialized = false;
+    private List<EmployeeNominationView> Nominations = new();
+    private string ActiveQuarterName = "";
+    private string ActiveYearName = "";
+    private string ActiveQuarterCloseDate = "";
+ 
+    protected override async Task OnInitializedAsync()
+    {
+        await Session.InitializeAsync(JS, forceRefresh: true);
+        IsInitialized = true;
+        await LoadEmployeeDashboard();
+    }
+ 
+    private async Task LoadEmployeeDashboard()
+    {
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "https://localhost:51332/api/Dashboard/Employee",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            Console.WriteLine($"Employee Dashboard Response: {response}");
+            
+            var data = System.Text.Json.JsonSerializer.Deserialize<EmployeeDashboardView>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+            
+            if (data != null)
+            {
+                Nominations = data.Nominations ?? new List<EmployeeNominationView>();
+                ActiveQuarterName = data.ActiveQuarterName ?? "";
+                ActiveYearName = data.ActiveYearName ?? "";
+                ActiveQuarterCloseDate = data.ActiveQuarterCloseDate ?? "";
+                
+                Console.WriteLine($"ActiveQuarterName: {ActiveQuarterName}, ActiveYearName: {ActiveYearName}, CloseDate: {ActiveQuarterCloseDate}");
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+            Console.WriteLine($"Error loading employee dashboard: {ex.Message}");
+        }
+    }
+
+    private async Task HandleLogout()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirmLogout");
+        if (confirmed)
+        {
+            await Session.ClearSessionAsync(JS);
+            Nav.NavigateTo("/", forceLoad: true);
+        }
+    }
+ 
+    public class EmployeeNominationView
+    {
+        public string? NomineeName { get; set; }
+        public string? CategoryName { get; set; }
+        public string? Status { get; set; }
+    }
+ 
+    public class EmployeeDashboardView
+    {
+        public List<EmployeeNominationView>? Nominations { get; set; }
+        public string? ActiveQuarterName { get; set; }
+        public string? ActiveYearName { get; set; }
+        public string? ActiveQuarterCloseDate { get; set; }
+    }
+}

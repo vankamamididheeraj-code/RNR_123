@@ -5,7 +5,14 @@
 
 <h1>Log out</h1>
 
-@if (isProcessing)
+@if (!isUserLoggedIn)
+{
+    <div class="alert alert-warning">
+        <p>You are not currently logged in.</p>
+        <a href="/account/login" class="btn btn-primary">Go to Login</a>
+    </div>
+}
+else if (isProcessing)
 {
     <p>Logging you out...</p>
 }

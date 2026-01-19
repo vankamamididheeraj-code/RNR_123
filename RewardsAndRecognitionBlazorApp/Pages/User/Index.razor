@@ -1,10 +1,13 @@
 ﻿@page "/users"
+@layout EmptyLayout
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
 @using RewardsAndRecognitionBlazorApp.ViewModels
 @using System.Linq
 @inject HttpClient Http
 @inject IJSRuntime JS
+
+<AdminNavBar ActivePage="Users" />
 
 <div class="user-header">
     <h2><i class="bi bi-people-fill me-2"></i> Users</h2>

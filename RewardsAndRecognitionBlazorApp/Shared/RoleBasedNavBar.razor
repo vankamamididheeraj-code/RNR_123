@@ -1,0 +1,17 @@
+@using RewardsAndRecognitionBlazorApp.ViewModels
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject UserSession Session
+
+@if (Session.Role == "Manager")
+{
+    <ManagerNavBar ActivePage="Nominations" />
+}
+else if (Session.Role == "Director")
+{
+    <DirectorNavBar ActivePage="Nominations" />
+}
+else if (Session.Role == "TeamLead" || Session.Role == "Team Lead")
+{
+    <TeamLeadNavBar ActivePage="Nominations" />
+}

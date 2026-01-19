@@ -137,5 +137,25 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             await _yearQuarterRepo.RestoreAsync(id);
             return NoContent();
         }
+        // GET: api/yearquarter/years
+        [HttpGet("years")]
+        public async Task<IActionResult> GetYears()
+        {
+            var all = await _yearQuarterRepo.GetAllAsync();
+            var years = all.Select(yq => yq.Year).Distinct().OrderBy(y => y).ToList();
+            return Ok(years);
+        }
+ 
+        // GET: api/yearquarter/quarters/{year}
+        [HttpGet("quarters/{year:int}")]
+        public async Task<IActionResult> GetQuartersByYear(int year)
+        {
+            var all = await _yearQuarterRepo.GetAllAsync();
+            var quarters = all.Where(yq => yq.Year == year)
+                              .Select(yq => new { yq.Id, Name = $"{yq.Quarter} {yq.Year}" })
+                              .OrderBy(q => q.Id)
+                              .ToList();
+            return Ok(quarters);
+        }
     }
 }

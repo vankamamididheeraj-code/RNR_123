@@ -1,6 +1,8 @@
 ﻿@page "/nominations"
+@page "/nomination/index"
+@layout EmptyLayout
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Manager,Director,TeamLead")]
 @using System.Net.Http.Json
 @inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
 @using Microsoft.AspNetCore.Components.Authorization
@@ -11,6 +13,8 @@
 @* @inject AuthenticationStateProvider AuthStateProvider *@
 @inject IJSRuntime JS
 @inject JsonSerializerOptions JsonOptions
+
+<RoleBasedNavBar />
 
 <style>
     /* ===== Page Loading Spinner (full screen overlay) ===== */
@@ -260,9 +264,43 @@
         color: var(--indigo-main);
     }
 
-</style>
+    /* ===== Page Header ===== */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 30px 0 20px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
 
-<h2><i class="bi bi-star-fill"></i> Nominations</h2>
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background-color: var(--indigo-main);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--indigo-dark);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+</style>
 
 @if (isLoading)
 {
@@ -273,7 +311,23 @@
     </div>
 }
 
-<div class="filter-bar">
+<div class="page-header">
+    <div>
+        <h2><i class="bi bi-star-fill me-2"></i> Nominations</h2>
+    </div>
+
+    <div class="actions">
+        <a class="btn btn-primary" href="/nomination/create">
+            <i class="bi bi-plus-circle-fill"></i> Create Nomination
+        </a>
+
+        <a class="btn btn-indigo" href="/nomination/upload" style="white-space: nowrap;">
+            <i class="bi bi-file-earmark-arrow-up-fill"></i> Import from Excel
+        </a>
+    </div>
+</div>
+
+@* <div class="filter-bar">
     <select class="form-select" style="min-width:200px"
             @bind="selectedFilter"
             @bind:after="OnFilterChanged">
@@ -288,7 +342,7 @@
            placeholder="Search nominee / nominator / category..."
            @bind="liveSearch"
            @bind:event="oninput" />
-</div>
+</div> *@
 
 <table class="table-custom">
     <thead>
@@ -325,6 +379,13 @@
                         <button class="btn btn-indigo" @onclick="() => OpenPreview(n)">
                             <i class="bi bi-eye"></i> Preview
                         </button>
+
+                        @if (!n.IsDeleted && CanReview(n))
+                        {
+                            <button class="btn btn-success" @onclick="() => NavigateToReview(n.Id)">
+                                <i class="bi bi-pencil-square"></i> Review
+                            </button>
+                        }
 
                         @if (!n.IsDeleted)
                         {
@@ -419,13 +480,95 @@
 
     private bool showPreview;
     private NominationPreview? preview;
+    private bool isTeamLeadView = false;
 
     protected override async Task OnInitializedAsync()
     {
         //await LoadRoles();
         // Initialize session from localStorage before loading data
         await Session.InitializeAsync(JS);
-        await LoadData(includeDeleted: true);
+        
+        // Read query parameters
+        var uri = new Uri(Nav.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var filterParam = query["filter"];
+        
+        // If TeamLead navigating from dashboard, use GetByNominator endpoint
+        if (!string.IsNullOrEmpty(filterParam) && Session.Role?.Equals("TeamLead", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            if (filterParam == "all")
+            {
+                isTeamLeadView = true;
+                await LoadTeamLeadNominations();
+            }
+            else if (filterParam == "pending")
+            {
+                isTeamLeadView = true;
+                await LoadTeamLeadNominationsPending();
+            }
+            else if (filterParam == "directorapproved" || filterParam == "directorrejected")
+            {
+                isTeamLeadView = true;
+                await LoadTeamLeadNominationsFiltered(filterParam);
+            }
+            else
+            {
+                await LoadData(includeDeleted: true);
+            }
+        }
+        // If Manager navigating from dashboard
+        else if (!string.IsNullOrEmpty(filterParam) && Session.Role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            if (filterParam == "all")
+            {
+                await LoadManagerNominations();
+            }
+            else if (filterParam == "pendingmanager")
+            {
+                await LoadManagerNominationsPending();
+            }
+            else if (filterParam == "managerapproved")
+            {
+                await LoadManagerNominationsApproved();
+            }
+            else if (filterParam == "managerrejected")
+            {
+                await LoadManagerNominationsRejected();
+            }
+            else
+            {
+                await LoadData(includeDeleted: true);
+            }
+        }
+        // If Director navigating from dashboard
+        else if (!string.IsNullOrEmpty(filterParam) && Session.Role?.Equals("Director", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            if (filterParam == "all")
+            {
+                await LoadDirectorNominations();
+            }
+            else if (filterParam == "pending")
+            {
+                await LoadDirectorNominationsPending();
+            }
+            else if (filterParam == "directorapproved")
+            {
+                await LoadDirectorNominationsApproved();
+            }
+            else if (filterParam == "directorrejected")
+            {
+                await LoadDirectorNominationsRejected();
+            }
+            else
+            {
+                await LoadData(includeDeleted: true);
+            }
+        }
+        else
+        {
+            await LoadData(includeDeleted: true);
+        }
+        
         isLoading = false;
     }
 
@@ -437,6 +580,318 @@
     //     IS_DIRECTOR = role.Equals("Director", StringComparison.OrdinalIgnoreCase);
     //     IS_TEAMLEAD = role.Equals("TeamLead", StringComparison.OrdinalIgnoreCase);
     // }
+
+    private async Task LoadTeamLeadNominations()
+    {
+        try
+        {
+            // Use fetchWithCredentials to call GetByNominator endpoint
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"api/nomination/nominator/{Session.UserId}",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            all = JsonSerializer.Deserialize<List<NominationView>>(response, JsonOptions) ?? new List<NominationView>();
+            totalCount = all.Count;
+            
+            // For TeamLead view, we don't use pagination
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading TeamLead nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadTeamLeadNominationsPending()
+    {
+        try
+        {
+            // Use fetchWithCredentials to call GetByNominator endpoint
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"api/nomination/nominator/{Session.UserId}",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var allNominations = JsonSerializer.Deserialize<List<NominationView>>(response, JsonOptions) ?? new List<NominationView>();
+            
+            // Filter for nominations that are not DirectorApproved or DirectorRejected
+            all = allNominations.Where(n => 
+                n.Status != NominationStatus.DirectorApproved && 
+                n.Status != NominationStatus.DirectorRejected
+            ).ToList();
+            
+            totalCount = all.Count;
+            
+            // For TeamLead view, we don't use pagination
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading TeamLead pending nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadTeamLeadNominationsFiltered(string status)
+    {
+        try
+        {
+            // Use fetchWithCredentials to call GetByNominator endpoint
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"api/nomination/nominator/{Session.UserId}",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var allNominations = JsonSerializer.Deserialize<List<NominationView>>(response, JsonOptions) ?? new List<NominationView>();
+            
+            // Filter by status
+            var statusEnum = status.ToLower() == "directorapproved" ? NominationStatus.DirectorApproved : NominationStatus.DirectorRejected;
+            all = allNominations.Where(n => n.Status == statusEnum).ToList();
+            
+            totalCount = all.Count;
+            
+            // For TeamLead view, we don't use pagination
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading TeamLead filtered nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadManagerNominations()
+    {
+        try
+        {
+            // Get all nominations via paged endpoint (Manager can see all nominations under their teams)
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            all = paged?.Items?.ToList() ?? new List<NominationView>();
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Manager nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadManagerNominationsPending()
+    {
+        try
+        {
+            // Get all nominations and filter for PendingManager status
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
+            all = allNominations.Where(n => n.Status == NominationStatus.PendingManager).ToList();
+            
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Manager pending nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadManagerNominationsApproved()
+    {
+        try
+        {
+            // Get all nominations and filter where this manager approved at Manager level
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
+            all = allNominations.Where(n => 
+                n.Approvals != null && 
+                n.Approvals.Any(a => 
+                    a.ApproverId == Session.UserId && 
+                    a.Level == ApprovalLevel.Manager && 
+                    a.Action == ApprovalAction.Approved
+                )
+            ).ToList();
+            
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Manager approved nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadManagerNominationsRejected()
+    {
+        try
+        {
+            // Get all nominations and filter where this manager rejected at Manager level
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
+            all = allNominations.Where(n => 
+                n.Approvals != null && 
+                n.Approvals.Any(a => 
+                    a.ApproverId == Session.UserId && 
+                    a.Level == ApprovalLevel.Manager && 
+                    a.Action == ApprovalAction.Rejected
+                )
+            ).ToList();
+            
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Manager rejected nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadDirectorNominations()
+    {
+        try
+        {
+            // Get all nominations (Director can see all nominations under their teams)
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            all = paged?.Items?.ToList() ?? new List<NominationView>();
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Director nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadDirectorNominationsPending()
+    {
+        try
+        {
+            // Get all nominations where Director has not taken action yet
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
+            
+            // Filter for nominations that don't have Director-level approval/rejection
+            all = allNominations.Where(n => 
+                n.Approvals == null || 
+                !n.Approvals.Any(a => 
+                    a.ApproverId == Session.UserId && 
+                    a.Level == ApprovalLevel.Director
+                )
+            ).ToList();
+            
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Director pending nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadDirectorNominationsApproved()
+    {
+        try
+        {
+            // Get all nominations where this director approved at Director level
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
+            all = allNominations.Where(n => 
+                n.Approvals != null && 
+                n.Approvals.Any(a => 
+                    a.ApproverId == Session.UserId && 
+                    a.Level == ApprovalLevel.Director && 
+                    a.Action == ApprovalAction.Approved
+                )
+            ).ToList();
+            
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Director approved nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
+
+    private async Task LoadDirectorNominationsRejected()
+    {
+        try
+        {
+            // Get all nominations where this director rejected at Director level
+            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
+            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            
+            var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
+            all = allNominations.Where(n => 
+                n.Approvals != null && 
+                n.Approvals.Any(a => 
+                    a.ApproverId == Session.UserId && 
+                    a.Level == ApprovalLevel.Director && 
+                    a.Action == ApprovalAction.Rejected
+                )
+            ).ToList();
+            
+            totalCount = all.Count;
+            pageNumber = 1;
+            pageSize = totalCount > 0 ? (int)totalCount : 10;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("console.error", "Error loading Director rejected nominations:", ex.ToString());
+            all = new List<NominationView>();
+            totalCount = 0;
+        }
+    }
 
     private async Task LoadData(bool includeDeleted)
     {
@@ -544,6 +999,35 @@
             || role.Equals("TeamLead", StringComparison.OrdinalIgnoreCase);
 
         return canDelete;
+    }
+
+    private bool CanReview(NominationView n)
+    {
+        var role = Session?.Role ?? "";
+        var status = n.Status.ToString();
+
+        // TeamLead cannot approve/reject - they can only create, preview, and delete nominations
+        
+        // Manager can review nominations pending manager approval
+        if (role.Equals("Manager", StringComparison.OrdinalIgnoreCase))
+        {
+            return status.Equals("PendingManager", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Director can review nominations reviewed by Manager (both approved and rejected) for final decision
+        if (role.Equals("Director", StringComparison.OrdinalIgnoreCase))
+        {
+            return status.Equals("ManagerApproved", StringComparison.OrdinalIgnoreCase) 
+                || status.Equals("ManagerRejected", StringComparison.OrdinalIgnoreCase)
+                || status.Equals("PendingDirector", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
+    }
+
+    private void NavigateToReview(Guid id)
+    {
+        Nav.NavigateTo($"/nomination/review/{id}");
     }
 
     private async Task ConfirmDelete(Guid id)

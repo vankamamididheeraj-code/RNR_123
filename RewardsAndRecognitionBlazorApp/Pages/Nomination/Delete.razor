@@ -1,4 +1,5 @@
 @page "/nominations/delete/{id:guid}"
+@layout EmptyLayout
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
 @inject HttpClient Http

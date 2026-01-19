@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "YBlaQq7h",
+  "version": "xkEBLaYF",
   "assets": [
     {
       "hash": "sha256-7zhu9E5dp6RcadXKzBFYydLvYHNWqcJQoPonq49+AtY=",
@@ -218,11 +218,11 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.Win32.Registry.wasm"
     },
     {
-      "hash": "sha256-BbOREe39u8TTOb5ismfG6xdAD+V631y+ZbQTNi8N4H8=",
+      "hash": "sha256-46HRI46KljANNkRPKGqVSaL1Sb8ZzJ+hagQW1sFfKOI=",
       "url": "_framework/RewardsAndRecognitionBlazorApp.pdb"
     },
     {
-      "hash": "sha256-YW4QHKBU9Cad10fMDaEGpvHpE31NC1IgEai5oBxQRcc=",
+      "hash": "sha256-iYfEVcenLN8hPrS7iYqIkS1KC4mhVG2YSbG+ev1GI4g=",
       "url": "_framework/RewardsAndRecognitionBlazorApp.wasm"
     },
     {
@@ -882,7 +882,7 @@ self.assetsManifest = {
       "url": "_framework/WindowsBase.wasm"
     },
     {
-      "hash": "sha256-UzWkGI4ExIBw9NxExFR3MdRbcN4Zxx7dsGAz0Hwh7is=",
+      "hash": "sha256-DbRbSzKbcbPFtlrJMms0tfjevxZFzZNiLciA7PZuHvU=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -938,8 +938,24 @@ self.assetsManifest = {
       "url": "_framework/netstandard.wasm"
     },
     {
+      "hash": "sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=",
+      "url": "css/all.min.css"
+    },
+    {
       "hash": "sha256-JOZWd9XYwDyrwjSB0PVTcc602GisYED21qQUCSMlGtI=",
       "url": "css/app.css"
+    },
+    {
+      "hash": "sha256-u2/YzYU5TLNn6KxY5HKS8taOsoj6Evq2jmVDCl3fzkg=",
+      "url": "css/bootstrap-icons/bootstrap-icons.css"
+    },
+    {
+      "hash": "sha256-TUVy7zFOG3NM3WSF+ROwOW2Bvt9NIWpHz94M3zKpMW4=",
+      "url": "css/bootstrap-icons/fonts/bootstrap-icons.woff"
+    },
+    {
+      "hash": "sha256-us1wr9p9od6sK71JtXF6TdEzvNWcN5Ul1wW4SS9njpU=",
+      "url": "css/bootstrap-icons/fonts/bootstrap-icons.woff2"
     },
     {
       "hash": "sha256-SiIVMGgRhdXjKSTIddX7mh9IbOXVcwQWc7/p4nS6D/0=",
@@ -962,7 +978,7 @@ self.assetsManifest = {
       "url": "icon-512.png"
     },
     {
-      "hash": "sha256-vQeTf7z472bx8hFBb1+bcYbzY8oazrSLUwO62Wmwd80=",
+      "hash": "sha256-t//FaXu/mevBFn22YN7aBugdjkCu+R0NU4IL+ssrrRw=",
       "url": "index.html"
     },
     {
@@ -978,12 +994,32 @@ self.assetsManifest = {
       "url": "js/usersUi.js"
     },
     {
+      "hash": "sha256-gvZPYrsDwbwYJLD5yeBfcNujPhRoGOY831wwbIzz3t0=",
+      "url": "js/vendor/bootstrap.bundle.min.js"
+    },
+    {
+      "hash": "sha256-3s55x5rvnmHXnqLlMg0v8/YOseaMNdiTF6I/CKxcQVE=",
+      "url": "js/vendor/sweetalert2.all.min.js"
+    },
+    {
       "hash": "sha256-cH4IMmfmG+6JxmZqHo9Wq2vg9kA6gidnycXNR8Y4qIU=",
       "url": "manifest.webmanifest"
     },
     {
       "hash": "sha256-enKgCMkYmCpfEcmg6Annbmc40VZ/A6aYYSQjZfVn2cU=",
       "url": "sample-data/weather.json"
+    },
+    {
+      "hash": "sha256-dIMyCQxLjiD5XQ/1nwviD6nIiTWdOzbUuIbXM3YFQgc=",
+      "url": "webfonts/fa-brands-400.woff2"
+    },
+    {
+      "hash": "sha256-jn5eobFfYqsU29QXaOj7zSHMhZpOpdqBJFfucUKZ+zU=",
+      "url": "webfonts/fa-regular-400.woff2"
+    },
+    {
+      "hash": "sha256-cVKmkz7j1pDsKvPQnanXAXI9Fqo0EKbYDyj/iGbzuIA=",
+      "url": "webfonts/fa-solid-900.woff2"
     }
   ]
 };

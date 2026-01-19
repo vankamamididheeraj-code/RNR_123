@@ -19,8 +19,12 @@ namespace RewardsAndRecognitionBlazorApp.Pages.User
         private int PageSize { get; set; } = 5;
         private long TotalCount { get; set; }
 
+        [Inject] private UserSession Session { get; set; } = default!;
+        [Inject] private NavigationManager Nav { get; set; } = default!;
+
         protected override async Task OnInitializedAsync()
         {
+            await Session.InitializeAsync(JS);
             await ApplyBearerTokenIfPresentAsync();
             await LoadAsync();
         }

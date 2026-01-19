@@ -1,17 +1,13 @@
-@page "/nominations/create"
+@page "/nomination/create"
+@layout EmptyLayout
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "Admin")]
-@using System.Net.Http.Json
-@using System
+@attribute [Authorize(Roles = "Manager,TeamLead,Director")]
 @using RewardsAndRecognitionBlazorApp.ViewModels
-@using System.ComponentModel.DataAnnotations
-@using System.Linq
-@using System.Collections.Generic
-@using System.Text.Json
 @inject HttpClient Http
 @inject NavigationManager Nav
 @inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
 @inject IJSRuntime JS
+@inject JsonSerializerOptions JsonOptions
 
 <h2>Create Nomination</h2>
 

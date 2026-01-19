@@ -1,4 +1,5 @@
 ﻿@page "/yearquarter"
+@layout EmptyLayout
 @using Microsoft.AspNetCore.Authorization
 @attribute [Authorize(Roles = "Admin")]
 @using RewardsAndRecognitionBlazorApp.ViewModels
@@ -9,6 +10,8 @@
 @inject JsonSerializerOptions JsonOptions
 
 <PageTitle>Year Quarters</PageTitle>
+
+<AdminNavBar ActivePage="YearQuarter" />
 
 <style>
     :root {

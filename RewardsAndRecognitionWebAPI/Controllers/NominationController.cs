@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using RewardsAndRecognitionBlazorApp.ViewModels;
 using RewardsAndRecognitionRepository.Interfaces;
 using RewardsAndRecognitionRepository.Models;
 using RewardsAndRecognitionRepository.Data;
+using RewardsAndRecognitionRepository.Enums;
+using RewardsAndRecognitionRepository.Service;
+using RewardsAndRecognitionWebAPI.ViewModels;
 
 namespace RewardsAndRecognitionWebAPI.Controllers
 {
@@ -14,11 +18,19 @@ namespace RewardsAndRecognitionWebAPI.Controllers
     {
         private readonly INominationRepo _nominationRepo;
         private readonly RewardsAndRecognitionRepository.Models.ApplicationDbContext _context;
+        private readonly UserManager<User> _userManager;
+        private readonly IEmailService _emailService;
 
-        public NominationController(INominationRepo nominationRepo, RewardsAndRecognitionRepository.Models.ApplicationDbContext context)
+        public NominationController(
+            INominationRepo nominationRepo, 
+            RewardsAndRecognitionRepository.Models.ApplicationDbContext context,
+            UserManager<User> userManager,
+            IEmailService emailService)
         {
             _nominationRepo = nominationRepo;
             _context = context;
+            _userManager = userManager;
+            _emailService = emailService;
         }
 
         // GET: api/nomination
@@ -49,6 +61,7 @@ namespace RewardsAndRecognitionWebAPI.Controllers
                 .Include(n => n.Nominee)
                 .Include(n => n.Category)
                 .Include(n => n.YearQuarter)
+                .Include(n => n.Approvals)
                 .AsQueryable();
 
             if (!includeDeleted)
@@ -73,24 +86,49 @@ namespace RewardsAndRecognitionWebAPI.Controllers
 
             baseQuery = baseQuery.OrderByDescending(n => n.CreatedAt);
 
-            var paged = await baseQuery.ToPagedResultAsync<RewardsAndRecognitionRepository.Models.Nomination, RewardsAndRecognitionWebAPI.ViewModels.NominationView>(pageNumber, pageSize,
-                qry => qry.Select(n => new RewardsAndRecognitionWebAPI.ViewModels.NominationView
+            // Fetch the paginated nominations with all includes
+            var totalCount = await baseQuery.CountAsync(ct);
+            var nominations = await baseQuery
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            // Map to view models
+            var nominationViews = nominations.Select(n => new RewardsAndRecognitionWebAPI.ViewModels.NominationView
+            {
+                Id = n.Id,
+                CategoryId = n.CategoryId,
+                Category = n.Category == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.CategoryView { Id = n.Category.Id, Name = n.Category.Name },
+                NominatorId = n.NominatorId,
+                Nominator = n.Nominator == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.UserView { Id = n.Nominator.Id, Email = n.Nominator.Email },
+                NomineeId = n.NomineeId,
+                Nominee = n.Nominee == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.UserView { Id = n.Nominee.Id, Email = n.Nominee.Email },
+                YearQuarterId = n.YearQuarterId,
+                YearQuarter = n.YearQuarter == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.YearQuarterView { Id = n.YearQuarter.Id, Year = n.YearQuarter.Year, Quarter = n.YearQuarter.Quarter, StartDate = n.YearQuarter.StartDate, EndDate = n.YearQuarter.EndDate, IsActive = n.YearQuarter.IsActive },
+                Description = n.Description,
+                Achievements = n.Achievements,
+                Status = n.Status,
+                CreatedAt = n.CreatedAt,
+                IsDeleted = n.IsDeleted,
+                Approvals = n.Approvals?.Select(a => new RewardsAndRecognitionWebAPI.ViewModels.ApprovalView
                 {
-                    Id = n.Id,
-                    CategoryId = n.CategoryId,
-                    Category = n.Category == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.CategoryView { Id = n.Category.Id, Name = n.Category.Name },
-                    NominatorId = n.NominatorId,
-                    Nominator = n.Nominator == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.UserView { Id = n.Nominator.Id, Email = n.Nominator.Email },
-                    NomineeId = n.NomineeId,
-                    Nominee = n.Nominee == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.UserView { Id = n.Nominee.Id, Email = n.Nominee.Email },
-                    YearQuarterId = n.YearQuarterId,
-                    YearQuarter = n.YearQuarter == null ? null : new RewardsAndRecognitionWebAPI.ViewModels.YearQuarterView { Id = n.YearQuarter.Id, Year = n.YearQuarter.Year, Quarter = n.YearQuarter.Quarter, StartDate = n.YearQuarter.StartDate, EndDate = n.YearQuarter.EndDate, IsActive = n.YearQuarter.IsActive },
-                    Description = n.Description,
-                    Achievements = n.Achievements,
-                    Status = n.Status,
-                    CreatedAt = n.CreatedAt,
-                    IsDeleted = n.IsDeleted
-                }), ct);
+                    Id = a.Id,
+                    NominationId = a.NominationId,
+                    ApproverId = a.ApproverId,
+                    Action = a.Action,
+                    Level = a.Level,
+                    ActionAt = a.ActionAt,
+                    Remarks = a.Remarks
+                }).ToList() ?? new List<RewardsAndRecognitionWebAPI.ViewModels.ApprovalView>()
+            }).ToList();
+
+            var paged = new PagedResult<RewardsAndRecognitionWebAPI.ViewModels.NominationView>
+            {
+                Items = nominationViews.ToArray(),
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
 
             return Ok(paged);
         }
@@ -167,5 +205,167 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             await _nominationRepo.SoftDeleteNominationAsync(id);
             return NoContent();
         }
+
+        // POST: api/nomination/{id}/review
+        [HttpPost("{id:guid}/review")]
+        public async Task<IActionResult> Review(Guid id, [FromBody] ReviewRequest request)
+        {
+            try
+            {
+                if (request == null)
+                    return BadRequest(new { error = "Request body is null" });
+
+                if (string.IsNullOrEmpty(request.Action))
+                    return BadRequest(new { error = "Action is required" });
+
+                if (string.IsNullOrEmpty(request.UserId))
+                    return BadRequest(new { error = "UserId is required" });
+
+                var nomination = await _context.Nominations
+                    .Include(n => n.Nominee)
+                    .Include(n => n.Nominator)
+                    .Include(n => n.Category)
+                    .Include(n => n.YearQuarter)
+                    .FirstOrDefaultAsync(n => n.Id == id);
+
+                if (nomination == null)
+                    return NotFound("Nomination not found");
+
+                var currentUser = await _userManager.FindByIdAsync(request.UserId);
+                if (currentUser == null)
+                    return NotFound("User not found");
+
+            var userRoles = await _userManager.GetRolesAsync(currentUser);
+
+            // TeamLead cannot approve/reject nominations
+            if (userRoles.Contains("TeamLead"))
+            {
+                return BadRequest("TeamLead users cannot approve or reject nominations. Only Managers and Directors can review nominations.");
+            }
+
+            if (!Enum.TryParse<ApprovalAction>(request.Action, ignoreCase: true, out var parsedAction))
+            {
+                return BadRequest("Invalid action. Must be 'Approved' or 'Rejected'");
+            }
+
+            // Determine the appropriate status based on role and action
+            if (userRoles.Contains("Manager"))
+            {
+                // Manager approval or rejection both go to Director for final decision
+                nomination.Status = parsedAction == ApprovalAction.Approved
+                    ? NominationStatus.ManagerApproved
+                    : NominationStatus.ManagerRejected;
+            }
+            else if (userRoles.Contains("Director"))
+            {
+                // Director makes the final approval or rejection decision
+                nomination.Status = parsedAction == ApprovalAction.Approved
+                    ? NominationStatus.DirectorApproved
+                    : NominationStatus.DirectorRejected;
+            }
+            else
+            {
+                return BadRequest("User does not have appropriate role for approval");
+            }
+
+            await _nominationRepo.UpdateNominationAsync(nomination);
+
+            // Create approval record
+            var approval = new Approval
+            {
+                Id = Guid.NewGuid(),
+                NominationId = id,
+                ApproverId = currentUser.Id,
+                Action = parsedAction,
+                Level = userRoles.Contains("Manager") 
+                    ? ApprovalLevel.Manager 
+                    : ApprovalLevel.Director,
+                ActionAt = DateTime.UtcNow,
+                Remarks = request.Remarks
+            };
+
+            _context.Approvals.Add(approval);
+            await _context.SaveChangesAsync();
+
+            // Send emails if Director approved
+            if (nomination.Status == NominationStatus.DirectorApproved)
+            {
+                var nominator = nomination.Nominator ?? await _userManager.FindByIdAsync(nomination.NominatorId);
+                var nominee = nomination.Nominee ?? await _userManager.FindByIdAsync(nomination.NomineeId);
+
+                if (nominator != null && !string.IsNullOrEmpty(nominator.Email))
+                {
+                    try
+                    {
+                        await _emailService.SendEmailAsync(
+                            subject: "Nomination Approved",
+                            isHtml: true,
+                            body: $@"
+                            <body style=""font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #ffffff;"">
+                              <div style=""background-color: #ffffff; padding: 10px 20px; max-width: 600px; margin: auto; color: #000;"">
+                                <img src=""cid:bannerImage"" alt=""Zelis Banner"" style=""width: 100%; max-width: 600px;"">
+                                <h2 style='color: green;'>Congratulations!</h2>
+                                <p>Your nomination for <strong>{nominee?.Name}</strong> has been <strong>approved by the Director</strong>.</p>
+                                <p>Thank you for recognizing great work on our Rewards and Recognition platform.</p>
+                                <p style='color: gray;'>Regards,<br/>Rewards & Recognition Team</p>
+                              </div>
+                            </body>",
+                            to: nominator.Email
+                        );
+                    }
+                    catch (Exception)
+                    {
+                        // Log email error but don't fail the request
+                    }
+                }
+
+                if (nominee != null && !string.IsNullOrEmpty(nominee.Email))
+                {
+                    try
+                    {
+                        await _emailService.SendEmailAsync(
+                            subject: "You've Been Selected for an Award!",
+                            isHtml: true,
+                            body: $@"
+                            <body style=""font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #ffffff;"">
+                              <div style=""background-color: #ffffff; padding: 10px 20px; max-width: 600px; margin: auto; color: #000;"">
+                                <img src=""cid:bannerImage"" alt=""Zelis Banner"" style=""width: 100%; max-width: 600px;"">
+                                <h2 style='color: navy;'>Congratulations {nominee.Name}!</h2>
+                                <p>You have been selected for an <strong>award</strong> in the category of <strong>{nomination.Category?.Name}</strong> for <strong>{nomination.YearQuarter?.Quarter}</strong>.</p>
+                                <p>This recognition comes as part of our Rewards & Recognition initiative. Keep up the amazing work!</p>
+                                <p style='color: gray;'>Cheers,<br/>Rewards & Recognition Team</p>
+                              </div>
+                            </body>",
+                            to: nominee.Email
+                        );
+                    }
+                    catch (Exception)
+                    {
+                        // Log email error but don't fail the request
+                    }
+                }
+            }
+
+            return Ok(new 
+            { 
+                message = parsedAction == ApprovalAction.Approved 
+                    ? "Nomination approved successfully" 
+                    : "Nomination rejected successfully",
+                status = nomination.Status.ToString()
+            });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = "An error occurred", details = ex.Message });
+            }
+        }
+    }
+
+    // DTO for review request
+    public class ReviewRequest
+    {
+        public string Action { get; set; } = null!; // "Approved" or "Rejected"
+        public string? Remarks { get; set; }
+        public string UserId { get; set; } = null!; // Current user ID from session
     }
 }
