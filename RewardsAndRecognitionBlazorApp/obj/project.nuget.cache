@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "MLWwt75Hhas=",
+  "dgSpecHash": "v/w8gg6RZmo=",
   "success": true,
   "projectFilePath": "C:\\Project\\RNR_123\\RewardsAndRecognitionBlazorApp\\RewardsAndRecognitionBlazorApp.csproj",
   "expectedPackageFiles": [
@@ -54,8 +54,8 @@
     "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.jsinterop\\8.0.22\\microsoft.jsinterop.8.0.22.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.jsinterop.webassembly\\8.0.22\\microsoft.jsinterop.webassembly.8.0.22.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.net.http.headers\\2.3.0\\microsoft.net.http.headers.2.3.0.nupkg.sha512",
-    "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.22\\microsoft.net.illink.tasks.8.0.22.nupkg.sha512",
-    "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\9.0.11\\microsoft.net.sdk.webassembly.pack.9.0.11.nupkg.sha512",
+    "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.net.illink.tasks\\8.0.23\\microsoft.net.illink.tasks.8.0.23.nupkg.sha512",
+    "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.net.sdk.webassembly.pack\\9.0.12\\microsoft.net.sdk.webassembly.pack.9.0.12.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.netcore.platforms\\2.0.0\\microsoft.netcore.platforms.2.0.0.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.win32.registry\\4.5.0\\microsoft.win32.registry.4.5.0.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\system.buffers\\4.6.0\\system.buffers.4.6.0.nupkg.sha512",
@@ -65,7 +65,7 @@
     "C:\\Users\\PK018426\\.nuget\\packages\\system.security.cryptography.xml\\8.0.2\\system.security.cryptography.xml.8.0.2.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\system.security.principal.windows\\5.0.0\\system.security.principal.windows.5.0.0.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\system.text.encodings.web\\8.0.0\\system.text.encodings.web.8.0.0.nupkg.sha512",
-    "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\8.0.22\\microsoft.netcore.app.runtime.mono.browser-wasm.8.0.22.nupkg.sha512"
+    "C:\\Users\\PK018426\\.nuget\\packages\\microsoft.netcore.app.runtime.mono.browser-wasm\\8.0.23\\microsoft.netcore.app.runtime.mono.browser-wasm.8.0.23.nupkg.sha512"
   ],
   "logs": []
 }

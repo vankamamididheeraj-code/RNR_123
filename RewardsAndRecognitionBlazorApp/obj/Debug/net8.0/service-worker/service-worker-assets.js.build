@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "xkEBLaYF",
+  "version": "M7x+og0Z",
   "assets": [
     {
       "hash": "sha256-7zhu9E5dp6RcadXKzBFYydLvYHNWqcJQoPonq49+AtY=",
@@ -218,11 +218,11 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.Win32.Registry.wasm"
     },
     {
-      "hash": "sha256-46HRI46KljANNkRPKGqVSaL1Sb8ZzJ+hagQW1sFfKOI=",
+      "hash": "sha256-8NPNLLuIdNwmZmItMM1koEQ/IYdyOmETvMYZ2kV3CIk=",
       "url": "_framework/RewardsAndRecognitionBlazorApp.pdb"
     },
     {
-      "hash": "sha256-iYfEVcenLN8hPrS7iYqIkS1KC4mhVG2YSbG+ev1GI4g=",
+      "hash": "sha256-aIOpKjWxNIJsAk3p3vrhBno0O5x2lWSX1q18QMPcyZo=",
       "url": "_framework/RewardsAndRecognitionBlazorApp.wasm"
     },
     {
@@ -882,7 +882,7 @@ self.assetsManifest = {
       "url": "_framework/WindowsBase.wasm"
     },
     {
-      "hash": "sha256-DbRbSzKbcbPFtlrJMms0tfjevxZFzZNiLciA7PZuHvU=",
+      "hash": "sha256-pO4Ssns0hTFGz82jJRQBU5eZ7j9kicd3U4irsc34rY0=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -890,27 +890,27 @@ self.assetsManifest = {
       "url": "_framework/blazor.webassembly.js"
     },
     {
-      "hash": "sha256-shrivv+AA9mejPe5Z3aXpzf6r0C+U+vlsY87ADEM23w=",
+      "hash": "sha256-MVfdBJ6e7axwvjhKnKkzo13y4YElMb5/59I8Txh+b4M=",
       "url": "_framework/dotnet.js"
     },
     {
-      "hash": "sha256-NvEM9Egf17S0JrYweOXHytgI/uJLUuuR5wDL9ap9xQ8=",
+      "hash": "sha256-4pFEQ7u71bfezFF2JjeF5wnsOKoreRRjaG42v8rbx3k=",
       "url": "_framework/dotnet.js.map"
     },
     {
-      "hash": "sha256-vtotCeXt2UD6oc459laJT32vBgigZ+eLoUmdeFkvYDk=",
+      "hash": "sha256-NljIbpK/1KCj0+knpX8U77Rbl5kTtfFIuFjK7AuczEw=",
       "url": "_framework/dotnet.native.js"
     },
     {
-      "hash": "sha256-I9mo79uNpf37/J/jYCGkW9F0w+mgb+ezeNdHNbQNvf0=",
+      "hash": "sha256-2oXTIgIF6CRtacZxLfjueiJhJBKftH3jQkQwHv69Hjo=",
       "url": "_framework/dotnet.native.wasm"
     },
     {
-      "hash": "sha256-6bV/iAemowb59rmItegP8VsxwWpWUNyMb0Q76Fvvsjo=",
+      "hash": "sha256-TGUqQm2/C+r+yZ5BCjd72qyLw9wv0KPFKzKXk/giiyY=",
       "url": "_framework/dotnet.runtime.js"
     },
     {
-      "hash": "sha256-vilENRG5PLayjRLv4dqJ4cLwF9oJ89LuVkgJdiZvZGo=",
+      "hash": "sha256-q7DMTS47Kuz+62WSdQSDJ0IUt4hGl/62AvGb10jfb3U=",
       "url": "_framework/dotnet.runtime.js.map"
     },
     {

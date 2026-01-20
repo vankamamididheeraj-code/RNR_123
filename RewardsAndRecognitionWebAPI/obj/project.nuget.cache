@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "PZTuKwOQoOU=",
+  "dgSpecHash": "udoiCA6ZIsU=",
   "success": true,
-  "projectFilePath": "C:\\Project\\RNR_123\\rewardsandrecognitionwebapi\\RewardsAndRecognitionWebAPI.csproj",
+  "projectFilePath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\PK018426\\.nuget\\packages\\azure.core\\1.47.1\\azure.core.1.47.1.nupkg.sha512",
     "C:\\Users\\PK018426\\.nuget\\packages\\azure.identity\\1.14.2\\azure.identity.1.14.2.nupkg.sha512",

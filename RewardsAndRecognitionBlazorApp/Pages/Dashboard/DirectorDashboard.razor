@@ -127,7 +127,7 @@ else
         </div>
     </div>
  
-    <h4 class="mt-5 mb-4"><i class="bi bi-people-fill me-2"></i>Teams Under You</h4>
+    @* <h4 class="mt-5 mb-4"><i class="bi bi-people-fill me-2"></i>Teams Under You</h4>
     <div class="mb-4 d-flex align-items-center gap-3">
         <label class="form-label mb-0"><strong>Select Team:</strong></label>
         <select @onchange="OnTeamSelected" class="form-select w-auto">
@@ -137,6 +137,30 @@ else
                 <option value="@team.TeamId">@team.TeamName</option>
             }
         </select>
+    </div> *@
+
+    <h4 class="mt-5 mb-4"><i class="bi bi-person-vcard me-2"></i>Manager & Team Selection</h4>
+    <div class="mb-5 d-flex align-items-center gap-3 flex-wrap">
+        <div>
+            <label class="form-label mb-1"><strong>Select Manager:</strong></label>
+            <select @onchange="OnManagerSelected" value="@SelectedManagerId" class="form-select">
+                <option value="">-- Choose a manager --</option>
+                @foreach (var manager in DirectorManagers)
+                {
+                    <option value="@manager.ManagerId">@manager.ManagerName</option>
+                }
+            </select>
+        </div>
+        <div>
+            <label class="form-label mb-1"><strong>Select Team:</strong></label>
+            <select @onchange="OnManagerTeamSelected" value="@SelectedManagerTeamId" disabled="@(string.IsNullOrEmpty(SelectedManagerId))" class="form-select">
+                <option value="">-- Choose a team --</option>
+                @foreach (var team in ManagerTeams)
+                {
+                    <option value="@team.TeamId">@team.TeamName</option>
+                }
+            </select>
+        </div>
     </div>
 
     @if (ShowTeamNominationsModal)
@@ -236,6 +260,10 @@ else
     private string ActiveQuarterId = "";
     private bool IsInitialized = false;
     private List<TeamView> DirectorTeams = new();
+    private List<ManagerView> DirectorManagers = new();
+    private List<TeamView> ManagerTeams = new();
+    private string SelectedManagerId = "";
+    private string SelectedManagerTeamId = "";
     private bool ShowTeamNominationsModal = false;
     private List<TeamNominationView> TeamNominations = new();
     private string SelectedTeamName = "";
@@ -247,7 +275,106 @@ else
         IsInitialized = true;
         await LoadYears();
         await LoadDirectorTeams();
+        await LoadDirectorManagers();
         await LoadDashboardData();
+    }
+
+    private async Task LoadDirectorManagers()
+    {
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "https://localhost:51332/api/Dashboard/Director/Managers",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            DirectorManagers = System.Text.Json.JsonSerializer.Deserialize<List<ManagerView>>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            ) ?? new List<ManagerView>();
+        }
+        catch (Exception ex)
+        {
+            // Handle error
+        }
+    }
+
+    private async Task OnManagerSelected(ChangeEventArgs e)
+    {
+        SelectedManagerId = e.Value?.ToString() ?? "";
+        SelectedManagerTeamId = "";
+        ManagerTeams.Clear();
+
+        if (!string.IsNullOrEmpty(SelectedManagerId))
+        {
+            await LoadManagerTeams();
+        }
+    }
+
+    private async Task LoadManagerTeams()
+    {
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"https://localhost:51332/api/Dashboard/Manager/TeamsByManager?managerId={SelectedManagerId}",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            ManagerTeams = System.Text.Json.JsonSerializer.Deserialize<List<TeamView>>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            ) ?? new List<TeamView>();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            ManagerTeams = new List<TeamView>();
+        }
+    }
+
+    private async Task OnManagerTeamSelected(ChangeEventArgs e)
+    {
+        var teamId = e.Value?.ToString() ?? "";
+        if (string.IsNullOrEmpty(teamId) || string.IsNullOrEmpty(SelectedQuarterId))
+        {
+            return;
+        }
+
+        var selectedTeam = ManagerTeams.FirstOrDefault(t => t.TeamId == teamId);
+        SelectedTeamName = selectedTeam?.TeamName ?? "";
+        
+        ShowTeamNominationsModal = true;
+        TeamNominations = null;
+        SearchText = "";
+
+        try
+        {
+            var result = await JS.InvokeAsync<System.Text.Json.JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                $"https://localhost:51332/api/Dashboard/Team/Nominations?teamId={teamId}&yearQuarterId={SelectedQuarterId}",
+                null
+            );
+            
+            string response = result.GetProperty("text").GetString() ?? "";
+            TeamNominations = System.Text.Json.JsonSerializer.Deserialize<List<TeamNominationView>>(
+                response,
+                new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            ) ?? new List<TeamNominationView>();
+            
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            TeamNominations = new List<TeamNominationView>();
+        }
     }
 
     private async Task LoadDirectorTeams()
@@ -273,7 +400,7 @@ else
         }
     }
 
-    private async Task OnTeamSelected(ChangeEventArgs e)
+    @* private async Task OnTeamSelected(ChangeEventArgs e)
     {
         var teamId = e.Value?.ToString() ?? "";
         if (string.IsNullOrEmpty(teamId) || string.IsNullOrEmpty(SelectedQuarterId))
@@ -309,7 +436,7 @@ else
         {
             TeamNominations = new List<TeamNominationView>();
         }
-    }
+    } *@
 
     private void CloseModal()
     {
@@ -426,6 +553,12 @@ else
     {
         public string? TeamId { get; set; }
         public string? TeamName { get; set; }
+    }
+
+    public class ManagerView
+    {
+        public string? ManagerId { get; set; }
+        public string? ManagerName { get; set; }
     }
 
     public class TeamNominationView

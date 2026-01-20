@@ -1,7 +1,7 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Project\\RNR_123\\rewardsandrecognitionwebapi\\RewardsAndRecognitionWebAPI.csproj": {}
+    "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj": {}
   },
   "projects": {
     "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
@@ -93,18 +93,18 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.309/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Project\\RNR_123\\rewardsandrecognitionwebapi\\RewardsAndRecognitionWebAPI.csproj": {
+    "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Project\\RNR_123\\rewardsandrecognitionwebapi\\RewardsAndRecognitionWebAPI.csproj",
+        "projectUniqueName": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
         "projectName": "RewardsAndRecognitionWebAPI",
-        "projectPath": "C:\\Project\\RNR_123\\rewardsandrecognitionwebapi\\RewardsAndRecognitionWebAPI.csproj",
+        "projectPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
         "packagesPath": "C:\\Users\\PK018426\\.nuget\\packages\\",
-        "outputPath": "C:\\Project\\RNR_123\\rewardsandrecognitionwebapi\\obj\\",
+        "outputPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -181,7 +181,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.309/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

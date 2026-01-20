@@ -57,21 +57,21 @@ else
  
         .hero-section {
             text-align: center;
-            padding: 100px 20px 60px;
+            padding: 30px 20px 20px;
             background: linear-gradient(to right, #6a11cb, #2575fc);
             color: white;
-            border-radius: 20px;
+            border-radius: 12px;
         }
  
         .hero-title {
-            font-size: 3rem;
+            font-size: 1.6rem;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
         }
  
         .hero-subtitle {
-            font-size: 1.2rem;
-            max-width: 650px;
+            font-size: 0.95rem;
+            max-width: 550px;
             margin: 0 auto;
             color: #e0e0e0;
         }
@@ -80,45 +80,49 @@ else
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 30px;
-            padding: 60px 20px 40px;
+            gap: 20px;
+            padding: 30px 20px 25px;
             background: linear-gradient(to bottom, #f9f9f9, #f0f4ff);
+            max-width: 900px;
+            margin: 0 auto;
         }
  
         .feature-box {
-            width: 300px;
-            padding: 30px 25px;
-            border-radius: 15px;
+            width: calc(33.333% - 14px);
+            min-width: 250px;
+            max-width: 280px;
+            padding: 15px 12px;
+            border-radius: 10px;
             background: white;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
  
             .feature-box:hover {
                 transform: scale(1.05);
-                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+                box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
             }
  
         .feature-icon {
-            font-size: 2.8rem;
-            margin-bottom: 12px;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
         }
  
         .feature-title {
-            font-size: 1.3rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #333;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
  
         .feature-desc {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             color: #555;
         }
  
         .stats-section {
-            padding: 40px 20px;
+            padding: 25px 20px;
             background: white;
             text-align: center;
         }
@@ -126,26 +130,26 @@ else
         .stats-grid {
             display: flex;
             justify-content: center;
-            gap: 40px;
+            gap: 25px;
             flex-wrap: wrap;
         }
  
         .stat-box {
-            padding: 20px;
-            border-radius: 10px;
+            padding: 12px 18px;
+            border-radius: 8px;
             background: #f8f9fa;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            min-width: 150px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            min-width: 130px;
         }
  
         .stat-number {
-            font-size: 2rem;
+            font-size: 1.6rem;
             font-weight: bold;
             color: #007bff;
         }
  
         .stat-label {
-            font-size: 1rem;
+            font-size: 0.9rem;
             color: #666;
         }
     </style>

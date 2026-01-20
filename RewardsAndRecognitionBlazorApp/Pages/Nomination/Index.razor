@@ -682,8 +682,15 @@
         try
         {
             // Get all nominations via paged endpoint (Manager can see all nominations under their teams)
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             all = paged?.Items?.ToList() ?? new List<NominationView>();
             totalCount = all.Count;
@@ -703,8 +710,15 @@
         try
         {
             // Get all nominations and filter for PendingManager status
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
             all = allNominations.Where(n => n.Status == NominationStatus.PendingManager).ToList();
@@ -726,8 +740,15 @@
         try
         {
             // Get all nominations and filter where this manager approved at Manager level
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
             all = allNominations.Where(n => 
@@ -756,8 +777,15 @@
         try
         {
             // Get all nominations and filter where this manager rejected at Manager level
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
             all = allNominations.Where(n => 
@@ -786,8 +814,15 @@
         try
         {
             // Get all nominations (Director can see all nominations under their teams)
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             all = paged?.Items?.ToList() ?? new List<NominationView>();
             totalCount = all.Count;
@@ -807,18 +842,23 @@
         try
         {
             // Get all nominations where Director has not taken action yet
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
             
-            // Filter for nominations that don't have Director-level approval/rejection
+            // Filter for nominations pending director review (matching dashboard logic)
             all = allNominations.Where(n => 
-                n.Approvals == null || 
-                !n.Approvals.Any(a => 
-                    a.ApproverId == Session.UserId && 
-                    a.Level == ApprovalLevel.Director
-                )
+                n.Status == NominationStatus.ManagerApproved || 
+                n.Status == NominationStatus.ManagerRejected ||
+                n.Status == NominationStatus.PendingDirector
             ).ToList();
             
             totalCount = all.Count;
@@ -837,18 +877,20 @@
     {
         try
         {
-            // Get all nominations where this director approved at Director level
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            // Get all nominations where director approved (matching dashboard logic)
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
             all = allNominations.Where(n => 
-                n.Approvals != null && 
-                n.Approvals.Any(a => 
-                    a.ApproverId == Session.UserId && 
-                    a.Level == ApprovalLevel.Director && 
-                    a.Action == ApprovalAction.Approved
-                )
+                n.Status == NominationStatus.DirectorApproved
             ).ToList();
             
             totalCount = all.Count;
@@ -867,18 +909,20 @@
     {
         try
         {
-            // Get all nominations where this director rejected at Director level
-            var url = $"api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false";
-            var paged = await Http.GetFromJsonAsync<PagedResult<NominationView>>(url, JsonOptions);
+            // Get all nominations where director rejected (matching dashboard logic)
+            var result = await JS.InvokeAsync<JsonElement>(
+                "fetchWithCredentials",
+                "GET",
+                "api/nomination/paged?pageNumber=1&pageSize=1000&includeDeleted=false",
+                null
+            );
+
+            string response = result.GetProperty("text").GetString() ?? "[]";
+            var paged = JsonSerializer.Deserialize<PagedResult<NominationView>>(response, JsonOptions);
             
             var allNominations = paged?.Items?.ToList() ?? new List<NominationView>();
             all = allNominations.Where(n => 
-                n.Approvals != null && 
-                n.Approvals.Any(a => 
-                    a.ApproverId == Session.UserId && 
-                    a.Level == ApprovalLevel.Director && 
-                    a.Action == ApprovalAction.Rejected
-                )
+                n.Status == NominationStatus.DirectorRejected
             ).ToList();
             
             totalCount = all.Count;

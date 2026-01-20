@@ -58,11 +58,39 @@ namespace RewardsAndRecognitionWebAPI.Controllers
 
             var baseQuery = _context.Nominations
                 .Include(n => n.Nominator)
-                .Include(n => n.Nominee)
+                .Include(n => n.Nominee!)
+                    .ThenInclude(nominee => nominee.Team)
                 .Include(n => n.Category)
                 .Include(n => n.YearQuarter)
                 .Include(n => n.Approvals)
                 .AsQueryable();
+
+            // Apply role-based filtering
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var role = roles.FirstOrDefault();
+
+                // If Director, filter to only show nominations from teams under this director
+                if (role == "Director")
+                {
+                    baseQuery = baseQuery.Where(n => 
+                        n.Nominee != null && 
+                        n.Nominee.Team != null &&
+                        n.Nominee.Team.DirectorId == user.Id &&
+                        !n.Nominee.Team.IsDeleted);
+                }
+                // If Manager, filter to only show nominations from teams under this manager
+                else if (role == "Manager")
+                {
+                    baseQuery = baseQuery.Where(n => 
+                        n.Nominee != null && 
+                        n.Nominee.Team != null &&
+                        n.Nominee.Team.ManagerId == user.Id &&
+                        !n.Nominee.Team.IsDeleted);
+                }
+            }
 
             if (!includeDeleted)
                 baseQuery = baseQuery.Where(n => !n.IsDeleted);

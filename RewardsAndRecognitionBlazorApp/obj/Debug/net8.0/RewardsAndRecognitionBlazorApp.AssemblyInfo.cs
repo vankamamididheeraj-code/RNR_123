@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RewardsAndRecognitionBlazorApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64f7117ddb069b1581b9acaa3b45b2c5e1e2989b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4c40622d928de49d7081d1781190c69a2c933922")]
 [assembly: System.Reflection.AssemblyProductAttribute("RewardsAndRecognitionBlazorApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RewardsAndRecognitionBlazorApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

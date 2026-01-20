@@ -97,9 +97,28 @@ namespace RewardsAndRecognitionWebAPI.Controllers
                 return BadRequest("Invalid YearQuarterId");
             }
 
-            // Get all nominations for the specified quarter
+            // Get all teams where the logged-in user is the team lead
+            var allTeams = await _teamRepo.GetAllAsync();
+            var teamLeadTeamIds = allTeams
+                .Where(t => t.TeamLeadId == user.Id && !t.IsDeleted)
+                .Select(t => t.Id)
+                .ToList();
+
+            // Get all users in those teams
+            var usersInTeamLeadTeams = await _context.Users
+                .Where(u => u.TeamId.HasValue && teamLeadTeamIds.Contains(u.TeamId.Value))
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            // Include the team lead themselves
+            usersInTeamLeadTeams.Add(user.Id);
+
+            // Get all nominations for the specified quarter created by team lead or users under team lead
             var allNominations = await _nominationRepo.GetAllNominationsAsync();
-            var quarterNominations = allNominations.Where(n => n.YearQuarterId == quarterId).ToList();
+            var quarterNominations = allNominations
+                .Where(n => n.YearQuarterId == quarterId && 
+                           usersInTeamLeadTeams.Contains(n.NominatorId))
+                .ToList();
 
             // Calculate statistics
             var totalNominations = quarterNominations.Count;
@@ -145,12 +164,33 @@ namespace RewardsAndRecognitionWebAPI.Controllers
                 return BadRequest("Invalid YearQuarterId");
             }
 
-            // Get all nominations for the specified quarter
+            // Get all teams under the manager
+            var allTeams = await _teamRepo.GetAllAsync();
+            var managerTeamIds = allTeams
+                .Where(t => t.ManagerId == user.Id && !t.IsDeleted)
+                .Select(t => t.Id)
+                .ToList();
+
+            // Get all nominations for the specified quarter where nominee is in manager's teams
             var allNominations = await _nominationRepo.GetAllNominationsAsync();
-            var quarterNominations = allNominations.Where(n => n.YearQuarterId == quarterId).ToList();
+            var quarterNominations = allNominations
+                .Where(n => n.YearQuarterId == quarterId && 
+                           n.Nominee != null && 
+                           n.Nominee.TeamId.HasValue && 
+                           managerTeamIds.Contains(n.Nominee.TeamId.Value))
+                .ToList();
 
             // Get nomination IDs for this quarter
             var nominationIds = quarterNominations.Select(n => n.Id).ToList();
+
+            // Get all manager-level approvals from Approvals table
+            var managerApprovals = await _context.Approvals
+                .Where(a => nominationIds.Contains(a.NominationId) 
+                    && a.Level == ApprovalLevel.Manager 
+                    && a.Action == ApprovalAction.Approved)
+                .Select(a => a.NominationId)
+                .Distinct()
+                .ToListAsync();
 
             // Get all manager-level rejections from Approvals table
             var managerRejections = await _context.Approvals
@@ -165,10 +205,8 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             var totalNominations = quarterNominations.Count;
             var pendingManagerApproval = quarterNominations.Count(n => 
                 n.Status == NominationStatus.PendingManager);
-            var managerApproved = quarterNominations.Count(n => 
-                n.Status == NominationStatus.ManagerApproved || 
-                n.Status == NominationStatus.PendingDirector ||
-                n.Status == NominationStatus.DirectorApproved);
+            // Count all nominations that have Manager-level approval in Approvals table
+            var managerApproved = managerApprovals.Count;
             // Count all nominations that have Manager-level rejection in Approvals table
             var managerRejected = managerRejections.Count;
 
@@ -205,21 +243,55 @@ namespace RewardsAndRecognitionWebAPI.Controllers
                 return BadRequest("Invalid YearQuarterId");
             }
 
-            // Get all nominations for the specified quarter
+            // Get all teams under the director
+            var allTeams = await _teamRepo.GetAllAsync();
+            var directorTeamIds = allTeams
+                .Where(t => t.DirectorId == user.Id && !t.IsDeleted)
+                .Select(t => t.Id)
+                .ToList();
+
+            // Get all nominations for the specified quarter where nominee is in director's teams
             var allNominations = await _nominationRepo.GetAllNominationsAsync();
-            var quarterNominations = allNominations.Where(n => n.YearQuarterId == quarterId).ToList();
+            var quarterNominations = allNominations
+                .Where(n => n.YearQuarterId == quarterId && 
+                           n.Nominee != null && 
+                           n.Nominee.TeamId.HasValue && 
+                           directorTeamIds.Contains(n.Nominee.TeamId.Value))
+                .ToList();
+
+            // Get nomination IDs for this quarter
+            var nominationIds = quarterNominations.Select(n => n.Id).ToList();
+
+            // Get all director-level approvals from Approvals table
+            var directorApprovals = await _context.Approvals
+                .Where(a => nominationIds.Contains(a.NominationId) 
+                    && a.Level == ApprovalLevel.Director 
+                    && a.Action == ApprovalAction.Approved)
+                .Select(a => a.NominationId)
+                .Distinct()
+                .ToListAsync();
+
+            // Get all director-level rejections from Approvals table
+            var directorRejections = await _context.Approvals
+                .Where(a => nominationIds.Contains(a.NominationId) 
+                    && a.Level == ApprovalLevel.Director 
+                    && a.Action == ApprovalAction.Rejected)
+                .Select(a => a.NominationId)
+                .Distinct()
+                .ToListAsync();
+
+            // Get nominations with director action (approved or rejected)
+            var nominationsWithDirectorAction = directorApprovals.Concat(directorRejections).Distinct().ToList();
 
             // Calculate statistics
             var totalNominations = quarterNominations.Count;
-            // Director reviews nominations that have been reviewed by Manager (both approved and rejected)
+            // Pending Reviews = nominations that haven't been reviewed by director yet (no director-level action in Approvals table)
             var pendingReviews = quarterNominations.Count(n => 
-                n.Status == NominationStatus.ManagerApproved || 
-                n.Status == NominationStatus.ManagerRejected ||
-                n.Status == NominationStatus.PendingDirector);
-            var finalApproved = quarterNominations.Count(n => 
-                n.Status == NominationStatus.DirectorApproved);
-            var finalRejected = quarterNominations.Count(n => 
-                n.Status == NominationStatus.DirectorRejected);
+                !nominationsWithDirectorAction.Contains(n.Id));
+            // Count all nominations that have Director-level approval in Approvals table
+            var finalApproved = directorApprovals.Count;
+            // Count all nominations that have Director-level rejection in Approvals table
+            var finalRejected = directorRejections.Count;
 
             var dashboardData = new
             {
@@ -317,6 +389,74 @@ namespace RewardsAndRecognitionWebAPI.Controllers
                 .ToList();
 
             return Ok(directorTeams);
+        }
+
+        // GET: api/dashboard/director/managers
+        [HttpGet("Director/Managers")]
+        [Authorize(Roles = "Director")]
+        public async Task<IActionResult> GetDirectorManagers()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            // Get all teams where the director is assigned
+            var allTeams = await _teamRepo.GetAllAsync();
+            var directorTeams = allTeams.Where(t => t.DirectorId == user.Id && !t.IsDeleted).ToList();
+
+            // Get unique managers from these teams
+            var managerIds = directorTeams
+                .Where(t => !string.IsNullOrEmpty(t.ManagerId))
+                .Select(t => t.ManagerId)
+                .Distinct()
+                .ToList();
+
+            var managers = new List<object>();
+            foreach (var managerId in managerIds)
+            {
+                var manager = await _userManager.FindByIdAsync(managerId);
+                if (manager != null && !manager.IsDeleted)
+                {
+                    managers.Add(new
+                    {
+                        ManagerId = manager.Id,
+                        ManagerName = manager.Name
+                    });
+                }
+            }
+
+            return Ok(managers);
+        }
+
+        // GET: api/dashboard/manager/teams-by-manager?managerId={managerId}
+        [HttpGet("Manager/TeamsByManager")]
+        [Authorize(Roles = "Director")]
+        public async Task<IActionResult> GetTeamsByManager([FromQuery] string managerId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            if (string.IsNullOrEmpty(managerId))
+            {
+                return BadRequest("ManagerId is required");
+            }
+
+            var allTeams = await _teamRepo.GetAllAsync();
+            var managerTeams = allTeams
+                .Where(t => t.ManagerId == managerId && t.DirectorId == user.Id && !t.IsDeleted)
+                .Select(t => new
+                {
+                    TeamId = t.Id.ToString(),
+                    TeamName = t.Name
+                })
+                .ToList();
+
+            return Ok(managerTeams);
         }
 
         // GET: api/dashboard/team/nominations?teamId={teamId}&yearQuarterId={yearQuarterId}
