@@ -8,6 +8,7 @@
 @inject RewardsAndRecognitionBlazorApp.ViewModels.UserSession Session
 @inject IJSRuntime JS
 @inject JsonSerializerOptions JsonOptions
+@implements IAsyncDisposable
 
 <h2>Create Nomination</h2>
 
@@ -30,6 +31,15 @@ else
                 <div class="alert alert-danger">@errorMessage</div>
             }
 
+            @if (hasDraft)
+            {
+                <div class="alert alert-info">
+                    <strong>Draft Found!</strong> You have a saved draft from @draftDate?.ToString("MMM dd, yyyy").
+                    <button class="btn btn-sm btn-primary ms-2" @onclick="LoadDraft">Load Draft</button>
+                    <button class="btn btn-sm btn-secondary ms-1" @onclick="DiscardDraft">Discard</button>
+                </div>
+            }
+
             @if (!Session.IsLoggedIn)
             {
                 <div class="alert alert-warning">
@@ -47,11 +57,22 @@ else
 
                 <div class="form-group">
                     <label>Nominee <span class="text-danger">*</span></label>
-                    <InputSelect class="form-control" @bind-Value="form.NomineeId">
+                    <InputSelect class="form-control" @bind-Value="form.NomineeId" disabled="@isLoadingNominees">
                         <option value="">-- Select Nominee --</option>
-                        @foreach (var u in nominees)
+                        @if (isLoadingNominees)
                         {
-                            <option value="@u.Id">@u.Email</option>
+                            <option value="">Loading...</option>
+                        }
+                        else if (nominees.Count == 0)
+                        {
+                            <option value="">No nominees available</option>
+                        }
+                        else
+                        {
+                            @foreach (var u in nominees)
+                            {
+                                <option value="@u.Id">@u.Name (@u.Email)</option>
+                            }
                         }
                     </InputSelect>
                     <ValidationMessage For="@(() => form.NomineeId)" />
@@ -76,19 +97,27 @@ else
 
                 <div class="form-group">
                     <label>Description <span class="text-danger">*</span></label>
-                    <InputTextArea class="form-control" @bind-Value="form.Description" />
+                    <div class="quill-editor-wrapper">
+                        <div id="description-editor" class="quill-editor"></div>
+                    </div>
                     <ValidationMessage For="@(() => form.Description)" />
                 </div>
 
                 <div class="form-group">
                     <label>Achievements <span class="text-danger">*</span></label>
-                    <InputTextArea class="form-control" @bind-Value="form.Achievements" />
+                    <div class="quill-editor-wrapper">
+                        <div id="achievements-editor" class="quill-editor"></div>
+                    </div>
                     <ValidationMessage For="@(() => form.Achievements)" />
                 </div>
 
                 <div class="d-flex gap-3">
                     <button type="submit" class="btn btn-indigo" disabled="@isSubmitting">
                         @(isSubmitting ? "Submitting..." : "Submit Nomination")
+                    </button>
+
+                    <button type="button" class="btn btn-warning" @onclick="SaveDraft" disabled="@isSavingDraft">
+                        @(isSavingDraft ? "Saving..." : "Save Draft")
                     </button>
 
                     <button type="button" class="btn btn-secondary" @onclick="Cancel">
@@ -157,65 +186,29 @@ else
 
 </style>
 
-@*@inject JsonSerializerOptions JsonOptions*@
-
 @code {
     private bool isLoading = true;
     private bool isSubmitting = false;
+    private bool isSavingDraft = false;
+    private bool isLoadingNominees = false;
     private string? errorMessage;
 
     private List<UserView> nominees = new();
     private List<CategoryView> categories = new();
+
+    private DotNetObjectReference<Create>? dotNetRef;
+    private bool editorInitialized = false;
+    private bool achievementsEditorInitialized = false;
+
+    private bool hasDraft = false;
+    private DateTime? draftDate;
+    private Guid? draftId;
 
     private Guid activeYearQuarterId;
     private string activeQuarterDisplay = "";
 
     // Form model (keeps strings for dropdown binding)
     private CreateNominationView form = new();
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     try
-    //     {
-    //         1) Load dropdown data
-    //         NOTE: Replace these URLs with your actual endpoints.
-    //         nominees = await Http.GetFromJsonAsync<List<UserView>>("api/user/active") ?? new();
-    //         categories = await Http.GetFromJsonAsync<List<CategoryView>>("api/category") ?? new();
-
-    //         2) Load active quarter
-    //         Expected response example: { "id": "GUID", "year": 2026, "quarter": 1 }
-    //         var list = await Http.GetFromJsonAsync<List<YearQuarterDto>>("api/yearquarter/active") ?? new();
-
-    //         var active = list.FirstOrDefault(x => x.IsActive && !x.IsDeleted)
-    //                   ?? list.Where(x => !x.IsDeleted)
-    //                          .OrderByDescending(x => x.Year)
-    //                          .ThenByDescending(x => x.Quarter)
-    //                          .FirstOrDefault();
-
-    //         if (active == null)
-    //         {
-    //             errorMessage = "No quarter found.";
-    //             return;
-    //         }
-
-    //         activeYearQuarterId = active.Id;
-    //         activeQuarterDisplay = $"{active.Year} Q{active.Quarter}";
-    //         form.YearQuarterId = activeYearQuarterId;
-
-
-    //         3) Set default hidden values (equivalent to MVC hidden fields)
-    //         form.NominatorId = Session.UserId; from manual login
-    //         form.YearQuarterId = activeYearQuarterId;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         errorMessage = "Failed to load form data.";
-    //     }
-    //     finally
-    //     {
-    //         isLoading = false;
-    //     }
-    // }
 
     protected override async Task OnInitializedAsync()
     {
@@ -234,20 +227,39 @@ else
                 return;
             }
 
-            //1) Nominees
+            // Set nominator from session
+            form.NominatorId = Session.UserId;
+
+            //1) Load nominees based on logged-in user's role
             try
             {
-                var resp = await Http.GetAsync("api/user/active");
+                isLoadingNominees = true;
+                var resp = await Http.GetAsync($"api/user/under-lead/{Session.UserId}");
                 var body = await resp.Content.ReadAsStringAsync();
 
                 if (!resp.IsSuccessStatusCode)
-                    throw new Exception($"Nominees failed: {(int)resp.StatusCode} {resp.ReasonPhrase}. Body: {body}");
+                {
+                    // If user is not a lead/manager/director, fall back to all active users
+                    var allUsersResp = await Http.GetAsync("api/user/active");
+                    var allUsersBody = await allUsersResp.Content.ReadAsStringAsync();
+                    
+                    if (allUsersResp.IsSuccessStatusCode)
+                    {
+                        nominees = System.Text.Json.JsonSerializer.Deserialize<List<UserView>>(allUsersBody,
+                            new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                    }
+                }
+                else
+                {
+                    nominees = System.Text.Json.JsonSerializer.Deserialize<List<UserView>>(body,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                }
 
-                nominees = System.Text.Json.JsonSerializer.Deserialize<List<UserView>>(body,
-                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                isLoadingNominees = false;
             }
             catch (Exception ex)
             {
+                isLoadingNominees = false;
                 throw new Exception("Error loading nominees. " + ex.Message);
             }
 
@@ -282,9 +294,7 @@ else
                     PropertyNameCaseInsensitive = true
                 };
 
-                var list = JsonSerializer.Deserialize<
-    List<RewardsAndRecognitionBlazorApp.Pages.Nomination.Create.YearQuarterApiDto>
->(body, options);
+                var list = JsonSerializer.Deserialize<List<YearQuarterApiDto>>(body, options);
 
                 var yq = list.FirstOrDefault(x => x.IsActive && !x.IsDeleted)
                       ?? list.FirstOrDefault(x => !x.IsDeleted);
@@ -301,8 +311,35 @@ else
                 throw new Exception("Error loading active quarter. " + ex.Message);
             }
 
-            // Set nominator from session
-            form.NominatorId = Session.UserId;
+            //4) Check for existing draft - API endpoint not implemented yet
+            // Uncomment when API endpoint is available
+            /*
+            try
+            {
+                var draftResp = await Http.GetAsync($"api/nomination/latest-draft/{Session.UserId}");
+                if (draftResp.IsSuccessStatusCode)
+                {
+                    var draftBody = await draftResp.Content.ReadAsStringAsync();
+                    var options = new System.Text.Json.JsonSerializerOptions 
+                    { 
+                        PropertyNameCaseInsensitive = true,
+                        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+                    };
+                    var draft = System.Text.Json.JsonSerializer.Deserialize<NominationView>(draftBody, options);
+
+                    if (draft != null)
+                    {
+                        hasDraft = true;
+                        draftDate = draft.CreatedAt;
+                        draftId = draft.Id;
+                    }
+                }
+            }
+            catch
+            {
+                // No draft found or error - not critical
+            }
+            */
         }
         catch (Exception ex)
         {
@@ -314,6 +351,52 @@ else
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Initialize editors after loading is complete
+        if (!isLoading)
+        {
+            try
+            {
+                if (!editorInitialized)
+                {
+                    dotNetRef = DotNetObjectReference.Create(this);
+                    await JS.InvokeVoidAsync("QuillInterop.initializeEditor", 
+                        "description-editor", 
+                        dotNetRef, 
+                        form.Description ?? "");
+                    editorInitialized = true;
+                }
+                
+                if (!achievementsEditorInitialized)
+                {
+                    await JS.InvokeVoidAsync("QuillInterop.initializeEditor", 
+                        "achievements-editor", 
+                        dotNetRef, 
+                        form.Achievements ?? "");
+                    achievementsEditorInitialized = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to initialize editor: {ex.Message}";
+                StateHasChanged();
+            }
+        }
+    }
+
+    [JSInvokable]
+    public void OnEditorContentChanged(string htmlContent)
+    {
+        form.Description = htmlContent;
+    }
+
+    [JSInvokable]
+    public void OnAchievementsEditorContentChanged(string htmlContent)
+    {
+        form.Achievements = htmlContent;
+    }
+
     private async Task HandleSubmit()
     {
         errorMessage = null;
@@ -321,7 +404,7 @@ else
 
         try
         {
-            // Validation guards beyond DataAnnotations (optional)
+            // Validation guards beyond DataAnnotations
             if (string.IsNullOrWhiteSpace(Session.UserId))
             {
                 errorMessage = "You must be logged in to submit a nomination.";
@@ -331,21 +414,39 @@ else
             // Map form -> Nomination (your API expects Nomination model)
             var nomination = new NominationView
             {
-                Id = Guid.NewGuid(), // optional; API/db may generate
+                Id = draftId ?? Guid.NewGuid(), // Use draft ID if updating from draft
                 NominatorId = Session.UserId,
                 NomineeId = form.NomineeId!,
                 CategoryId = Guid.Parse(form.CategoryId!),
                 YearQuarterId = form.YearQuarterId,
                 Description = form.Description!,
                 Achievements = form.Achievements!,
+                Status = NominationStatus.PendingManager,
                 // Status/CreatedAt are set by your API controller in POST.
             };
 
-            var resp = await Http.PostAsJsonAsync("api/nomination", nomination);
+            HttpResponseMessage resp;
+            
+            // If updating a draft, use PUT; otherwise POST
+            if (draftId.HasValue)
+            {
+                // Update existing draft to submitted status
+                resp = await Http.PutAsJsonAsync($"api/nomination/{draftId.Value}", nomination);
+            }
+            else
+            {
+                resp = await Http.PostAsJsonAsync("api/nomination", nomination);
+            }
 
             if (resp.IsSuccessStatusCode)
             {
-                Nav.NavigateTo("/nominations", true);
+                // Delete the draft flag after successful submission
+                if (draftId.HasValue)
+                {
+                    await Http.DeleteAsync($"api/nomination/{draftId.Value}");
+                }
+                
+                Nav.NavigateTo("/nominations", false);
                 return;
             }
 
@@ -362,7 +463,215 @@ else
         }
     }
 
+    private async Task SaveDraft()
+    {
+        errorMessage = null;
+        isSavingDraft = true;
+
+        try
+        {
+            if (string.IsNullOrWhiteSpace(Session.UserId))
+            {
+                errorMessage = "You must be logged in to save a draft.";
+                return;
+            }
+
+            var nomination = new NominationView
+            {
+                Id = draftId ?? Guid.NewGuid(),
+                NominatorId = Session.UserId,
+                NomineeId = form.NomineeId,
+                CategoryId = string.IsNullOrWhiteSpace(form.CategoryId) ? Guid.Empty : Guid.Parse(form.CategoryId),
+                YearQuarterId = form.YearQuarterId,
+                Description = form.Description ?? "",
+                Achievements = form.Achievements ?? "",
+                Status = NominationStatus.Draft,
+            };
+
+            HttpResponseMessage resp;
+
+            if (draftId.HasValue)
+            {
+                // Update existing draft
+                resp = await Http.PutAsJsonAsync($"api/nomination/draft/{draftId.Value}", nomination);
+            }
+            else
+            {
+                // Create new draft
+                resp = await Http.PostAsJsonAsync("api/nomination/draft", nomination);
+            }
+
+            if (resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                var options = new System.Text.Json.JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+                };
+                var savedDraft = System.Text.Json.JsonSerializer.Deserialize<NominationView>(body, options);
+
+                if (savedDraft != null)
+                {
+                    draftId = savedDraft.Id;
+                    hasDraft = true;
+                    draftDate = savedDraft.CreatedAt;
+                }
+
+                // Redirect to nominations page
+                Nav.NavigateTo("/nominations", false);
+                return;
+            }
+            else
+            {
+                var content = await resp.Content.ReadAsStringAsync();
+                errorMessage = $"Failed to save draft: {content}";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "An error occurred while saving draft: " + ex.Message;
+        }
+        finally
+        {
+            isSavingDraft = false;
+        }
+    }
+
+    private async Task LoadDraft()
+    {
+        if (!draftId.HasValue)
+            return;
+
+        try
+        {
+            var resp = await Http.GetAsync($"api/nomination/{draftId.Value}");
+            if (resp.IsSuccessStatusCode)
+            {
+                var body = await resp.Content.ReadAsStringAsync();
+                var options = new System.Text.Json.JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
+                };
+                var draft = System.Text.Json.JsonSerializer.Deserialize<NominationView>(body, options);
+
+                if (draft != null)
+                {
+                    form.NomineeId = draft.NomineeId;
+                    form.CategoryId = draft.CategoryId.ToString();
+                    form.Description = draft.Description;
+                    form.Achievements = draft.Achievements;
+                    form.YearQuarterId = draft.YearQuarterId;
+
+                    // Update Quill editors with draft content
+                    if (editorInitialized)
+                    {
+                        await JS.InvokeVoidAsync("QuillInterop.setContent", "description-editor", draft.Description ?? "");
+                    }
+                    if (achievementsEditorInitialized)
+                    {
+                        await JS.InvokeVoidAsync("QuillInterop.setContent", "achievements-editor", draft.Achievements ?? "");
+                    }
+
+                    // Reload nominees to ensure the selected nominee is in the list
+                    await LoadNominees();
+
+                    hasDraft = false; // Hide the banner after loading
+                    await JS.InvokeVoidAsync("alert", "Draft loaded successfully!");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error loading draft: " + ex.Message;
+        }
+    }
+
+    private async Task DiscardDraft()
+    {
+        if (!draftId.HasValue)
+            return;
+
+        try
+        {
+            var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to discard this draft?");
+            if (!confirmed)
+                return;
+
+            var resp = await Http.DeleteAsync($"api/nomination/{draftId.Value}");
+            if (resp.IsSuccessStatusCode)
+            {
+                hasDraft = false;
+                draftId = null;
+                draftDate = null;
+                await JS.InvokeVoidAsync("alert", "Draft discarded.");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error discarding draft: " + ex.Message;
+        }
+    }
+
+    private async Task LoadNominees()
+    {
+        try
+        {
+            isLoadingNominees = true;
+            var resp = await Http.GetAsync($"api/user/under-lead/{Session.UserId}");
+            var body = await resp.Content.ReadAsStringAsync();
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                // If user is not a lead/manager/director, fall back to all active users
+                var allUsersResp = await Http.GetAsync("api/user/active");
+                var allUsersBody = await allUsersResp.Content.ReadAsStringAsync();
+                
+                if (allUsersResp.IsSuccessStatusCode)
+                {
+                    nominees = System.Text.Json.JsonSerializer.Deserialize<List<UserView>>(allUsersBody,
+                        new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+                }
+            }
+            else
+            {
+                nominees = System.Text.Json.JsonSerializer.Deserialize<List<UserView>>(body,
+                    new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error loading nominees: " + ex.Message;
+        }
+        finally
+        {
+            isLoadingNominees = false;
+        }
+    }
+
     private void Cancel() => Nav.NavigateTo("/nominations");
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (editorInitialized)
+            {
+                await JS.InvokeVoidAsync("QuillInterop.destroyEditor", "description-editor");
+            }
+            if (achievementsEditorInitialized)
+            {
+                await JS.InvokeVoidAsync("QuillInterop.destroyEditor", "achievements-editor");
+            }
+        }
+        catch
+        {
+            // Ignore cleanup errors
+        }
+
+        dotNetRef?.Dispose();
+    }
 
     // ------- DTOs / Form model -------
 
@@ -374,6 +683,4 @@ else
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
     }
-
 }
-

@@ -449,12 +449,12 @@
 
                     <div class="popup-field">
                         <span class="popup-label">Description</span>
-                        <div class="popup-block">@preview.Description</div>
+                        <div class="popup-block">@SanitizeHtml(preview.Description)</div>
                     </div>
 
                     <div class="popup-field">
                         <span class="popup-label">Achievements</span>
-                        <div class="popup-block">@preview.Achievements</div>
+                        <div class="popup-block">@SanitizeHtml(preview.Achievements)</div>
                     </div>
                 </div>
             </div>
@@ -475,7 +475,7 @@
 
     // paging
     private int pageNumber = 1;
-    private int pageSize = 10;
+    private int pageSize = 5;
     private long totalCount = 0;
 
     private bool showPreview;
@@ -513,7 +513,7 @@
             }
             else
             {
-                await LoadData(includeDeleted: true);
+                await LoadData(includeDeleted: false);
             }
         }
         // If Manager navigating from dashboard
@@ -537,7 +537,7 @@
             }
             else
             {
-                await LoadData(includeDeleted: true);
+                await LoadData(includeDeleted: false);
             }
         }
         // If Director navigating from dashboard
@@ -561,12 +561,29 @@
             }
             else
             {
-                await LoadData(includeDeleted: true);
+                await LoadData(includeDeleted: false);
             }
         }
         else
         {
-            await LoadData(includeDeleted: true);
+            // If no filter param, load based on role
+            if (Session.Role?.Equals("TeamLead", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                isTeamLeadView = true;
+                await LoadTeamLeadNominations();
+            }
+            else if (Session.Role?.Equals("Manager", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                await LoadManagerNominations();
+            }
+            else if (Session.Role?.Equals("Director", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                await LoadDirectorNominations();
+            }
+            else
+            {
+                await LoadData(includeDeleted: false);
+            }
         }
         
         isLoading = false;
@@ -595,11 +612,15 @@
 
             string response = result.GetProperty("text").GetString() ?? "[]";
             all = JsonSerializer.Deserialize<List<NominationView>>(response, JsonOptions) ?? new List<NominationView>();
+            
+            // Filter out deleted nominations
+            all = all.Where(n => !n.IsDeleted).ToList();
+            
             totalCount = all.Count;
             
             // For TeamLead view, we don't use pagination
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -624,17 +645,18 @@
             string response = result.GetProperty("text").GetString() ?? "[]";
             var allNominations = JsonSerializer.Deserialize<List<NominationView>>(response, JsonOptions) ?? new List<NominationView>();
             
-            // Filter for nominations that are not DirectorApproved or DirectorRejected
+            // Filter for nominations that are not DirectorApproved or DirectorRejected and not deleted
             all = allNominations.Where(n => 
                 n.Status != NominationStatus.DirectorApproved && 
-                n.Status != NominationStatus.DirectorRejected
+                n.Status != NominationStatus.DirectorRejected &&
+                !n.IsDeleted
             ).ToList();
             
             totalCount = all.Count;
             
             // For TeamLead view, we don't use pagination
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -659,15 +681,15 @@
             string response = result.GetProperty("text").GetString() ?? "[]";
             var allNominations = JsonSerializer.Deserialize<List<NominationView>>(response, JsonOptions) ?? new List<NominationView>();
             
-            // Filter by status
+            // Filter by status and exclude deleted
             var statusEnum = status.ToLower() == "directorapproved" ? NominationStatus.DirectorApproved : NominationStatus.DirectorRejected;
-            all = allNominations.Where(n => n.Status == statusEnum).ToList();
+            all = allNominations.Where(n => n.Status == statusEnum && !n.IsDeleted).ToList();
             
             totalCount = all.Count;
             
             // For TeamLead view, we don't use pagination
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -695,7 +717,7 @@
             all = paged?.Items?.ToList() ?? new List<NominationView>();
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -725,7 +747,7 @@
             
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -762,7 +784,7 @@
             
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -799,7 +821,7 @@
             
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -827,7 +849,7 @@
             all = paged?.Items?.ToList() ?? new List<NominationView>();
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -863,7 +885,7 @@
             
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -895,7 +917,7 @@
             
             totalCount = all.Count;
             pageNumber = 1;
-            pageSize = totalCount > 0 ? (int)totalCount : 10;
+            pageSize = 5;
         }
         catch (Exception ex)
         {
@@ -986,7 +1008,10 @@
     private async Task OnPageChanged(int newPage)
     {
         pageNumber = newPage;
-        await LoadData(includeDeleted: selectedFilter == "deleted");
+        
+        // For role-based views, just update the page number and refresh the view
+        // FilteredItems will handle client-side pagination
+        StateHasChanged();
     }
 
 
@@ -1005,8 +1030,12 @@
                 _ => items
             };
 
-            // Server-side paging and filtering now; local FilteredItems is the current page
-            return items.OrderByDescending(x => x.CreatedAt);
+            // Apply ordering
+            var orderedItems = items.OrderByDescending(x => x.CreatedAt);
+            
+            // Apply client-side pagination for role-based views that load all data at once
+            var skip = (pageNumber - 1) * pageSize;
+            return orderedItems.Skip(skip).Take(pageSize);
         }
     }
 
@@ -1109,5 +1138,37 @@
     private void NavigateToDelete(Guid id)
     {
         Nav.NavigateTo($"/nominations/delete/{id}");
+    }
+
+    private MarkupString SanitizeHtml(string? html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+            return new MarkupString("");
+
+        // Simple HTML sanitization - allow only safe formatting tags
+        // Remove potentially dangerous tags and attributes
+        var sanitized = html;
+        
+        // Remove script tags and their content
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"<script[^>]*>.*?</script>", "", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+        
+        // Remove style tags and their content
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"<style[^>]*>.*?</style>", "", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+        
+        // Remove event handlers (onclick, onerror, etc.)
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"\s*on\w+\s*=\s*[""'][^""']*[""']", "", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        // Remove javascript: protocol from links
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"href\s*=\s*[""']javascript:[^""']*[""']", "href=\"#\"", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        return new MarkupString(sanitized);
     }
 }

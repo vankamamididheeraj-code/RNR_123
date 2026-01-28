@@ -318,6 +318,89 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             return Ok(await _userRepo.GetLeadsAsync(currentLeadId));
         }
 
+        // GET: api/user/under-lead/{leadId}
+        // Returns users who report under the specified TeamLead/Manager/Director
+        [HttpGet("under-lead/{leadId}")]
+        public async Task<IActionResult> GetUsersUnderLead(string leadId)
+        {
+            if (string.IsNullOrWhiteSpace(leadId))
+                return BadRequest("Lead ID is required");
+
+            var lead = await _userManager.FindByIdAsync(leadId);
+            if (lead == null)
+                return NotFound("Lead not found");
+
+            var roles = await _userManager.GetRolesAsync(lead);
+            var role = roles.FirstOrDefault();
+
+            List<User> usersUnder = new();
+
+            if (role == "TeamLead")
+            {
+                // Get all teams where this user is the TeamLead
+                var teams = await _context.Teams
+                    .Where(t => t.TeamLeadId == leadId && !t.IsDeleted)
+                    .ToListAsync();
+
+                // Get all users in those teams
+                var teamIds = teams.Select(t => t.Id).ToList();
+                usersUnder = await _context.Users
+                    .Where(u => u.TeamId.HasValue && teamIds.Contains(u.TeamId.Value) && !u.IsDeleted && u.IsActive == true)
+                    .ToListAsync();
+            }
+            else if (role == "Manager")
+            {
+                // Get all teams where this user is the Manager
+                var teams = await _context.Teams
+                    .Where(t => t.ManagerId == leadId && !t.IsDeleted)
+                    .ToListAsync();
+
+                // Get all users in those teams (including TeamLeads)
+                var teamIds = teams.Select(t => t.Id).ToList();
+                usersUnder = await _context.Users
+                    .Where(u => u.TeamId.HasValue && teamIds.Contains(u.TeamId.Value) && !u.IsDeleted && u.IsActive == true)
+                    .ToListAsync();
+            }
+            else if (role == "Director")
+            {
+                // Get all teams where this user is the Director
+                var teams = await _context.Teams
+                    .Where(t => t.DirectorId == leadId && !t.IsDeleted)
+                    .ToListAsync();
+
+                // Get all users in those teams (including TeamLeads and Managers)
+                var teamIds = teams.Select(t => t.Id).ToList();
+                usersUnder = await _context.Users
+                    .Where(u => u.TeamId.HasValue && teamIds.Contains(u.TeamId.Value) && !u.IsDeleted && u.IsActive == true)
+                    .ToListAsync();
+            }
+            else
+            {
+                return BadRequest("User is not a TeamLead, Manager, or Director");
+            }
+
+            // Map to UserView with roles
+            var userViews = new List<UserView>();
+            foreach (var u in usersUnder)
+            {
+                var userRoles = await _userManager.GetRolesAsync(u);
+                userViews.Add(new UserView
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email ?? "",
+                    TeamId = u.TeamId,
+                    TeamName = u.Team?.Name ?? "Not Assigned",
+                    ManagerName = u.Team?.Manager?.Name ?? "No Manager",
+                    Role = userRoles.FirstOrDefault() ?? "No Role",
+                    IsActive = u.IsActive,
+                    IsDeleted = u.IsDeleted
+                });
+            }
+
+            return Ok(userViews);
+        }
+
         // GET: api/user/deleted
         [HttpGet("deleted")]
         public async Task<IActionResult> GetDeletedUsers()

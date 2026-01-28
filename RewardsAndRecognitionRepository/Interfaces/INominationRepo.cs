@@ -63,5 +63,12 @@ namespace RewardsAndRecognitionRepository.Interfaces
  
         /// Get nominations pending director approval for the user.
         Task<List<Nomination>> GetNominationsPendingDirectorApprovalForUserAsync(string userId);
+
+        /// <summary>
+        /// Get approved nominations (DirectorApproved only) for a nominee.
+        /// This is used by Employee Dashboard to show only nominations approved by Director.
+        /// Rejected nominations are NOT returned.
+        /// </summary>
+        Task<IEnumerable<Nomination>> GetFinalizedNominationsForNomineeAsync(string nomineeId);
     }
 }

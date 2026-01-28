@@ -96,7 +96,11 @@ else
     @if (Nominations == null || !Nominations.Any())
     {
         <div class="alert alert-info mt-3">
-            You haven't submitted or received any nominations yet.
+            <i class="bi bi-info-circle"></i>
+            <strong>No approved nominations yet.</strong>
+            <p class="mb-0 mt-2">
+                You will see your nominations here after the Director approves them.
+            </p>
         </div>
     }
     else
@@ -114,12 +118,19 @@ else
                 @for (int i = 0; i < Nominations.Count; i++)
                 {
                     var n = Nominations[i];
+                    // Only DirectorApproved nominations are shown, so always use green badge
+                    var badgeClass = "bg-success";
+                    var iconClass = "bi bi-check-circle";
+                    
                     <tr>
                         <td>@(i + 1)</td>
                         <td>@n.NomineeName</td>
                         <td>@n.CategoryName</td>
                         <td>
-                            <span class="badge bg-secondary">@n.Status</span>
+                            <span class="badge @badgeClass">
+                                <i class="@iconClass"></i>
+                                @n.Status
+                            </span>
                         </td>
                     </tr>
                 }

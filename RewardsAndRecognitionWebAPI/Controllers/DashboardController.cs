@@ -319,11 +319,12 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             var activeQuarters = await _yearQuarterRepo.GetActiveAsync();
             var activeQuarter = activeQuarters.FirstOrDefault();
 
-            // Get all nominations where the user is either nominator or nominee
-            var allNominations = await _nominationRepo.GetAllNominationsAsync();
-            var userNominations = allNominations
-                .Where(n => n.NominatorId == user.Id || n.NomineeId == user.Id)
-                .OrderByDescending(n => n.CreatedAt)
+            // Get only APPROVED nominations where the user is the NOMINEE
+            // (DirectorApproved status only - rejected nominations are NOT shown)
+            // This ensures employees only see their approved nominations
+            var finalizedNominations = await _nominationRepo.GetFinalizedNominationsForNomineeAsync(user.Id);
+            
+            var userNominations = finalizedNominations
                 .Select(n => new
                 {
                     NomineeName = n.Nominee?.Name ?? "N/A",

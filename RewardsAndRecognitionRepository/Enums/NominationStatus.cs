@@ -8,6 +8,7 @@ namespace RewardsAndRecognitionRepository.Enums
 {
     public enum NominationStatus
     {
+        Draft,
         PendingManager,
         PendingDirector,
         ManagerApproved,

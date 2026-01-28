@@ -4,6 +4,7 @@ using RewardsAndRecognitionRepository.Interfaces;
 using RewardsAndRecognitionRepository.Models;
 using RewardsAndRecognitionWebAPI.ViewModels;
 using RewardsAndRecognitionRepository.Data;
+using RewardsAndRecognitionRepository.Helpers;
 
 namespace RewardsAndRecognitionWebAPI.Controllers
 {
@@ -91,6 +92,29 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Validate Quarter and Year
+            if (!yq.Quarter.HasValue)
+            {
+                return BadRequest("Quarter is required.");
+            }
+
+            if (yq.Year <= 0)
+            {
+                return BadRequest("Year must be a positive number.");
+            }
+
+            // Server-side date recalculation - DO NOT trust client dates
+            try
+            {
+                var (startDate, endDate) = QuarterDateHelper.GetQuarterDateRange(yq.Year, yq.Quarter.Value);
+                yq.StartDate = startDate;
+                yq.EndDate = endDate;
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest($"Invalid Quarter or Year: {ex.Message}");
+            }
+
             await _yearQuarterRepo.AddAsync(yq);
             return Ok(yq);
         }
@@ -99,27 +123,41 @@ namespace RewardsAndRecognitionWebAPI.Controllers
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update(Guid id, YearQuarter yq)
         {
-            // if (id != yq.Id)
-            //     return BadRequest("Mismatched ID");
-
-            // var existing = await _yearQuarterRepo.GetByIdAsync(id);
-            // if (existing == null)
-            //     return NotFound();
-
-            // await _yearQuarterRepo.UpdateAsync(yq);
-            // return NoContent();
             if (id != yq.Id)
-        return BadRequest("Mismatched ID");
+                return BadRequest("Mismatched ID");
 
-    try
-    {
-        await _yearQuarterRepo.UpdateAsync(yq);
-        return NoContent();
-    }
-    catch (InvalidOperationException ex) when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-    {
-        return NotFound();
-    }
+            // Validate Quarter and Year
+            if (!yq.Quarter.HasValue)
+            {
+                return BadRequest("Quarter is required.");
+            }
+
+            if (yq.Year <= 0)
+            {
+                return BadRequest("Year must be a positive number.");
+            }
+
+            // Server-side date recalculation - DO NOT trust client dates
+            try
+            {
+                var (startDate, endDate) = QuarterDateHelper.GetQuarterDateRange(yq.Year, yq.Quarter.Value);
+                yq.StartDate = startDate;
+                yq.EndDate = endDate;
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest($"Invalid Quarter or Year: {ex.Message}");
+            }
+
+            try
+            {
+                await _yearQuarterRepo.UpdateAsync(yq);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
+            {
+                return NotFound();
+            }
         }
 
         // DELETE soft: api/yearquarter/{id}

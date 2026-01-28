@@ -200,12 +200,103 @@ namespace RewardsAndRecognitionWebAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            nomination.Status = RewardsAndRecognitionRepository.Enums.NominationStatus.PendingManager;
+            // If no status is provided, default to PendingManager (not Draft)
+            if (nomination.Status == default)
+            {
+                nomination.Status = RewardsAndRecognitionRepository.Enums.NominationStatus.PendingManager;
+            }
+
             nomination.CreatedAt = DateTime.UtcNow;
 
             await _nominationRepo.AddNominationAsync(nomination);
 
             return Ok(nomination);
+        }
+
+        // POST: api/nomination/draft
+        [HttpPost("draft")]
+        public async Task<IActionResult> SaveDraft(Nomination nomination)
+        {
+            // Minimal validation for drafts - only require nominator
+            if (string.IsNullOrWhiteSpace(nomination.NominatorId))
+                return BadRequest("Nominator is required");
+
+            nomination.Status = RewardsAndRecognitionRepository.Enums.NominationStatus.Draft;
+            nomination.CreatedAt = DateTime.UtcNow;
+
+            await _nominationRepo.AddNominationAsync(nomination);
+
+            return Ok(nomination);
+        }
+
+        // PUT: api/nomination/draft/{id}
+        [HttpPut("draft/{id:guid}")]
+        public async Task<IActionResult> UpdateDraft(Guid id, Nomination nomination)
+        {
+            if (id != nomination.Id)
+                return BadRequest("ID mismatch");
+
+            var existing = await _nominationRepo.GetNominationByIdAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            if (existing.Status != RewardsAndRecognitionRepository.Enums.NominationStatus.Draft)
+                return BadRequest("Can only update nominations with Draft status");
+
+            // Update draft fields
+            existing.NomineeId = nomination.NomineeId;
+            existing.CategoryId = nomination.CategoryId;
+            existing.YearQuarterId = nomination.YearQuarterId;
+            existing.Description = nomination.Description;
+            existing.Achievements = nomination.Achievements;
+            existing.Status = RewardsAndRecognitionRepository.Enums.NominationStatus.Draft;
+
+            await _nominationRepo.UpdateNominationAsync(existing);
+
+            return Ok(existing);
+        }
+
+        // GET: api/nomination/drafts/{nominatorId}
+        [HttpGet("drafts/{nominatorId}")]
+        public async Task<IActionResult> GetDrafts(string nominatorId)
+        {
+            if (string.IsNullOrWhiteSpace(nominatorId))
+                return BadRequest("Nominator ID is required");
+
+            var drafts = await _context.Nominations
+                .Include(n => n.Nominee)
+                .Include(n => n.Category)
+                .Include(n => n.YearQuarter)
+                .Where(n => n.NominatorId == nominatorId && 
+                           n.Status == RewardsAndRecognitionRepository.Enums.NominationStatus.Draft && 
+                           !n.IsDeleted)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            return Ok(drafts);
+        }
+
+        // GET: api/nomination/latest-draft/{nominatorId}
+        [HttpGet("latest-draft/{nominatorId}")]
+        public async Task<IActionResult> GetLatestDraft(string nominatorId)
+        {
+            if (string.IsNullOrWhiteSpace(nominatorId))
+                return BadRequest("Nominator ID is required");
+
+            var draft = await _context.Nominations
+                .Include(n => n.Nominee)
+                .Include(n => n.Category)
+                .Include(n => n.YearQuarter)
+                .Where(n => n.NominatorId == nominatorId && 
+                           n.Status == RewardsAndRecognitionRepository.Enums.NominationStatus.Draft && 
+                           !n.IsDeleted)
+                .OrderByDescending(n => n.CreatedAt)
+                .FirstOrDefaultAsync();
+
+            if (draft == null)
+                return NotFound();
+
+            return Ok(draft);
         }
 
         // PUT: api/nomination/{id}

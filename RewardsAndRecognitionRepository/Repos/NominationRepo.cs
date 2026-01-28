@@ -338,6 +338,27 @@ namespace RewardsAndRecognitionRepository.Repos
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        /// <summary>
+        /// Get finalized approved nominations (DirectorApproved only) for a specific nominee.
+        /// Used by Employee Dashboard to show only nominations approved by Director.
+        /// Rejected nominations are NOT shown to employees.
+        /// </summary>
+        public async Task<IEnumerable<Nomination>> GetFinalizedNominationsForNomineeAsync(string nomineeId)
+        {
+            return await _context.Nominations
+                .Include(n => n.Nominator)
+                .Include(n => n.Nominee)
+                .Include(n => n.Category)
+                .Include(n => n.YearQuarter)
+                .Include(n => n.Approvals)
+                .Where(n => !n.IsDeleted && 
+                           n.NomineeId == nomineeId &&
+                           n.Status == Enums.NominationStatus.DirectorApproved)
+                .OrderByDescending(n => n.CreatedAt)
+                .AsNoTracking()
+                .ToListAsync();
+        }
  
     }
 }

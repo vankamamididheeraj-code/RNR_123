@@ -4,6 +4,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @using System.Net.Http.Json
 @using RewardsAndRecognitionBlazorApp.ViewModels
+@using RewardsAndRecognitionBlazorApp.Helpers
 @inject HttpClient Http
 @inject NavigationManager Nav
 
@@ -40,13 +41,13 @@
 
         <div class="mb-3">
             <label class="form-label">Year</label><span class="text-danger">*</span>
-            <InputNumber class="form-control" @bind-Value="model.Year" />
+            <InputNumber class="form-control" @bind-Value="model.Year" @bind-Value:after="UpdateDateRange" />
             <ValidationMessage For="@(() => model.Year)" class="text-danger" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Quarter</label><span class="text-danger">*</span>
-            <InputSelect class="form-select" @bind-Value="model.Quarter">
+            <InputSelect class="form-select" @bind-Value="model.Quarter" @bind-Value:after="UpdateDateRange">
                 <option value="">-- Select Quarter --</option>
                 @foreach (var q in quarters)
                 {
@@ -58,14 +59,14 @@
 
         <div class="mb-3">
             <label class="form-label">Start Date</label><span class="text-danger">*</span>
-            <InputDate class="form-control" @bind-Value="model.StartDate" />
-            <ValidationMessage For="@(() => model.StartDate)" class="text-danger" />
+            <input type="text" class="form-control" value="@(model.StartDate?.ToString("yyyy-MM-dd"))" readonly disabled />
+            <small class="text-muted">Auto-calculated from Year and Quarter</small>
         </div>
 
         <div class="mb-3">
             <label class="form-label">End Date</label><span class="text-danger">*</span>
-            <InputDate class="form-control" @bind-Value="model.EndDate" />
-            <ValidationMessage For="@(() => model.EndDate)" class="text-danger" />
+            <input type="text" class="form-control" value="@(model.EndDate?.ToString("yyyy-MM-dd"))" readonly disabled />
+            <small class="text-muted">Auto-calculated from Year and Quarter</small>
         </div>
 
         <div class="form-check mb-3">
@@ -96,6 +97,31 @@
     // dropdown values (same idea as ViewBag.Quarters)
     private readonly List<Quarter> quarters = Enum.GetValues<Quarter>().ToList();
 
+    private void UpdateDateRange()
+    {
+        // Auto-calculate dates when Year or Quarter changes
+        if (model.Year > 0 && model.Quarter.HasValue)
+        {
+            try
+            {
+                var (startDate, endDate) = QuarterDateHelper.GetQuarterDateRange(model.Year, model.Quarter.Value);
+                model.StartDate = startDate;
+                model.EndDate = endDate;
+            }
+            catch
+            {
+                // Invalid year or quarter
+                model.StartDate = null;
+                model.EndDate = null;
+            }
+        }
+        else
+        {
+            model.StartDate = null;
+            model.EndDate = null;
+        }
+    }
+
     private void Cancel()
     {
         Nav.NavigateTo("/yearquarter");
@@ -107,6 +133,13 @@
         {
             error = null;
             isSubmitting = true;
+
+            // Validate that Quarter and Year are provided
+            if (!model.Quarter.HasValue || model.Year <= 0)
+            {
+                error = "Year and Quarter are required.";
+                return;
+            }
 
             // Ensure a new id (API may also generate, but your model has Id)
             if (model.Id == Guid.Empty)

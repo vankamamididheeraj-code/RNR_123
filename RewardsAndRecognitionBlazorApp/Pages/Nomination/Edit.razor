@@ -126,12 +126,12 @@ else
 
                     <div class="popup-field">
                         <span class="popup-label">Description</span>
-                        <div class="popup-block">@preview.Description</div>
+                        <div class="popup-block">@SanitizeHtml(preview.Description)</div>
                     </div>
 
                     <div class="popup-field">
                         <span class="popup-label">Achievements</span>
-                        <div class="popup-block">@preview.Achievements</div>
+                        <div class="popup-block">@SanitizeHtml(preview.Achievements)</div>
                     </div>
                 </div>
             </div>
@@ -252,5 +252,36 @@ else
     {
         showPreview = false;
         preview = null;
+    }
+
+    private MarkupString SanitizeHtml(string? html)
+    {
+        if (string.IsNullOrWhiteSpace(html))
+            return new MarkupString("");
+
+        // Simple HTML sanitization - allow only safe formatting tags
+        var sanitized = html;
+        
+        // Remove script tags and their content
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"<script[^>]*>.*?</script>", "", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+        
+        // Remove style tags and their content
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"<style[^>]*>.*?</style>", "", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Singleline);
+        
+        // Remove event handlers
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"\s*on\w+\s*=\s*[""'][^""']*[""']", "", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        // Remove javascript: protocol from links
+        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, 
+            @"href\s*=\s*[""']javascript:[^""']*[""']", "href=\"#\"", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        return new MarkupString(sanitized);
     }
 }
