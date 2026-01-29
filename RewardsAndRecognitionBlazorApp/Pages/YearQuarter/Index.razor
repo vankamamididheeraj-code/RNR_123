@@ -190,148 +190,153 @@
 
 </style>
 
-<div class="page-header">
-    <div>
-        <h2><i class="bi bi-calendar2-week-fill me-2"></i> Year Quarters</h2>
-    </div>
+<div class="container-lg px-3">
 
-    <div class="actions">
-        <div class="form-switch">
-            <input class="form-check-input"
-                   type="checkbox"
-                   role="switch"
-                   id="toggleFilter"
-                   @bind="ShowDeleted" />
-            <label class="form-check-label" for="toggleFilter">Show Deleted</label>
+    <div class="page-header">
+        <div>
+            <h2><i class="bi bi-calendar2-week-fill me-2"></i> Year Quarters</h2>
         </div>
 
-        <a class="btn btn-primary" href="/yearquarter/create">
-            <i class="bi bi-plus-circle-fill"></i> Add Year Quarter
-        </a>
+        <div class="actions">
+            <div class="form-switch">
+                <input class="form-check-input"
+                       type="checkbox"
+                       role="switch"
+                       id="toggleFilter"
+                       @bind="ShowDeleted" />
+                <label class="form-check-label" for="toggleFilter">Show Deleted</label>
+            </div>
 
-        <a class="btn btn-indigo" href="/yearquarter/upload" style="white-space: nowrap;">
-            <i class="bi bi-plus-circle-fill"></i> Upload from Excel
-        </a>
-    </div>
-</div>
+            <a class="btn btn-primary" href="/yearquarter/create">
+                <i class="bi bi-plus-circle-fill"></i> Add Year Quarter
+            </a>
 
-@if (!string.IsNullOrWhiteSpace(error))
-{
-    <div class="alert">
-        <strong>Oops:</strong> @error
+            <a class="btn btn-indigo" href="/yearquarter/upload" style="white-space: nowrap;">
+                <i class="bi bi-plus-circle-fill"></i> Upload from Excel
+            </a>
+        </div>
     </div>
-}
-else if (isLoading)
-{
-    <p class="muted">Loading year quarters…</p>
-}
-else if (items == null || items.Count == 0)
-{
-    <p class="muted">No year quarters found.</p>
-}
-else
-{
-    <table class="yearquarter-table">
-        <thead>
-            <tr>
-                <th>Quarter</th>
-                <th>Year</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Active</th>
-                <th style="width: 220px;">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var yq in items)
-            {
+
+    
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="alert">
+            <strong>Oops:</strong> @error
+        </div>
+    }
+    else if (isLoading)
+    {
+        <p class="muted">Loading year quarters…</p>
+    }
+    else if (items == null || items.Count == 0)
+    {
+        <p class="muted">No year quarters found.</p>
+    }
+    else
+    {
+        <table class="yearquarter-table">
+            <thead>
                 <tr>
-                    <td>@(yq.Quarter?.ToString() ?? "-")</td>
-                    <td>@yq.Year</td>
-                    <td>@(yq.StartDate?.ToString("MM/dd/yyyy") ?? "-")</td>
-                    <td>@(yq.EndDate?.ToString("MM/dd/yyyy") ?? "-")</td>
-                    <td>
-                        @if (yq.IsActive)
-                        {
-                            <span class="badge bg-success">Yes</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-secondary">No</span>
-                        }
-                    </td>
-                    <td>
-                        @if (showDeleted)
-                        {
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm dropdown-toggle"
-                                        type="button"
-                                        id="dropdownMenuButton-@yq.Id"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@yq.Id">
-                                    <li>
-                                        <button type="button" class="dropdown-item" disabled="@isLoading"
-                                                @onclick="() => Restore(yq.Id)">
-                                            <i class="bi bi-arrow-clockwise"></i> Restore
-                                        </button>
-                                    </li>
-
-                                    <li>
-                                        <span class="dropdown-item disabled text-muted opacity-50">
-                                            <i class="bi bi-pencil-fill me-1 opacity-50"></i> Edit
-                                        </span>
-                                    </li>
-
-                                    <li>
-                                        <span class="dropdown-item disabled text-danger opacity-50">
-                                            <i class="bi bi-trash-fill me-1 opacity-50"></i> Deleted
-                                        </span>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm dropdown-toggle"
-                                        type="button"
-                                        id="dropdownMenuButton-@yq.Id"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@yq.Id">
-                                    <li>
-                                        <a class="dropdown-item" href="@($"/yearquarter/edit/{yq.Id}")">
-                                            <i class="bi bi-pencil-fill me-1"></i> Edit
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <button type="button" class="dropdown-item text-danger" disabled="@isLoading"
-                                                @onclick="() => ConfirmAndDelete(yq.Id)">
-                                            <i class="bi bi-trash-fill me-1"></i> Delete
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        }
-                    </td>
-
+                    <th>Quarter</th>
+                    <th>Year</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Active</th>
+                    <th style="width: 220px;">Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var yq in items)
+                {
+                    <tr>
+                        <td>@(yq.Quarter?.ToString() ?? "-")</td>
+                        <td>@yq.Year</td>
+                        <td>@(yq.StartDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                        <td>@(yq.EndDate?.ToString("MM/dd/yyyy") ?? "-")</td>
+                        <td>
+                            @if (yq.IsActive)
+                            {
+                                <span class="badge bg-success">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No</span>
+                            }
+                        </td>
+                        <td>
+                            @if (showDeleted)
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            id="dropdownMenuButton-@yq.Id"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
 
-    <div class="mt-3 d-flex justify-content-end align-items-center">
-        <Pager PageNumber="pageNumber" PageSize="pageSize" TotalCount="totalCount" PageChanged="OnPageChanged" />
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@yq.Id">
+                                        <li>
+                                            <button type="button" class="dropdown-item" disabled="@isLoading"
+                                                    @onclick="() => Restore(yq.Id)">
+                                                <i class="bi bi-arrow-clockwise"></i> Restore
+                                            </button>
+                                        </li>
+
+                                        <li>
+                                            <span class="dropdown-item disabled text-muted opacity-50">
+                                                <i class="bi bi-pencil-fill me-1 opacity-50"></i> Edit
+                                            </span>
+                                        </li>
+
+                                        <li>
+                                            <span class="dropdown-item disabled text-danger opacity-50">
+                                                <i class="bi bi-trash-fill me-1 opacity-50"></i> Deleted
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-light btn-sm dropdown-toggle"
+                                            type="button"
+                                            id="dropdownMenuButton-@yq.Id"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@yq.Id">
+                                        <li>
+                                            <a class="dropdown-item" href="@($"/yearquarter/edit/{yq.Id}")">
+                                                <i class="bi bi-pencil-fill me-1"></i> Edit
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <button type="button" class="dropdown-item text-danger" disabled="@isLoading"
+                                                    @onclick="() => ConfirmAndDelete(yq.Id)">
+                                                <i class="bi bi-trash-fill me-1"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="mt-3 d-flex justify-content-end align-items-center">
+            <Pager PageNumber="pageNumber" PageSize="pageSize" TotalCount="totalCount" PageChanged="OnPageChanged" />
+        </div>
+
+    }
+
     </div>
-}
 
 @code {
     //private bool showDeleted = false;

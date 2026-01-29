@@ -13,181 +13,181 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = browser
 build_property.RootNamespace = RewardsAndRecognitionBlazorApp
 build_property.RootNamespace = RewardsAndRecognitionBlazorApp
-build_property.ProjectDir = C:\Project\RNR_123\RewardsAndRecognitionBlazorApp\
+build_property.ProjectDir = C:\Projects\RewardsAndRecognitionBlazorApp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = false
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Project\RNR_123\RewardsAndRecognitionBlazorApp
+build_property.MSBuildProjectDirectory = C:\Projects\RewardsAndRecognitionBlazorApp
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/App.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/App.razor]
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Account/Login.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Account/Login.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dpbi5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Account/LogOut.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Account/LogOut.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWNjb3VudFxMb2dPdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Category/Create.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Category/Create.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcQ3JlYXRlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Category/Delete.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Category/Delete.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcRGVsZXRlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Category/Edit.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Category/Edit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcRWRpdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Category/Index.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Category/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ2F0ZWdvcnlcSW5kZXgucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Dashboard/AdminDashboard.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Dashboard/AdminDashboard.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXEFkbWluRGFzaGJvYXJkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Dashboard/DirectorDashboard.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Dashboard/DirectorDashboard.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXERpcmVjdG9yRGFzaGJvYXJkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Dashboard/EmployeeDashboard.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Dashboard/EmployeeDashboard.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXEVtcGxveWVlRGFzaGJvYXJkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Dashboard/ManagerDashboard.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Dashboard/ManagerDashboard.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXE1hbmFnZXJEYXNoYm9hcmQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Dashboard/TeamLeadDashboard.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Dashboard/TeamLeadDashboard.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRGFzaGJvYXJkXFRlYW1MZWFkRGFzaGJvYXJkLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Home/Index.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Home/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZVxJbmRleC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Nomination/Create.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Nomination/Create.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxDcmVhdGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Nomination/Delete.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Nomination/Delete.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxEZWxldGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Nomination/Edit.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Nomination/Edit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxFZGl0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Nomination/Index.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Nomination/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxJbmRleC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Nomination/Review.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Nomination/Review.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTm9taW5hdGlvblxSZXZpZXcucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Team/Create.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Team/Create.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxDcmVhdGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Team/Delete.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Team/Delete.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxEZWxldGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Team/Edit.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Team/Edit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxFZGl0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Team/Index.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Team/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVGVhbVxJbmRleC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/User/Create.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/User/Create.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxDcmVhdGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/User/Delete.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/User/Delete.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxEZWxldGUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/User/Edit.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/User/Edit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxFZGl0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/User/Index.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/User/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclxJbmRleC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/Weather.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/Weather.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcV2VhdGhlci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Create.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Create.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcQ3JlYXRlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Delete.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Delete.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcRGVsZXRlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Edit.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Edit.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcRWRpdC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Index.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Pages/YearQuarter/Index.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcWWVhclF1YXJ0ZXJcSW5kZXgucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/AdminNavBar.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/AdminNavBar.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEFkbWluTmF2QmFyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/DirectorNavBar.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/DirectorNavBar.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXERpcmVjdG9yTmF2QmFyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/EmptyLayout.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/EmptyLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEVtcHR5TGF5b3V0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/HomeNavBar.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/HomeNavBar.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEhvbWVOYXZCYXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/ManagerNavBar.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/ManagerNavBar.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1hbmFnZXJOYXZCYXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/Pager.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/Pager.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFBhZ2VyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/RoleBasedNavBar.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/RoleBasedNavBar.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFJvbGVCYXNlZE5hdkJhci5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Shared/TeamLeadNavBar.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Shared/TeamLeadNavBar.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFRlYW1MZWFkTmF2QmFyLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/_Imports.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Layout/MainLayout.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Layout/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-s9l0jwog18
 
-[C:/Project/RNR_123/RewardsAndRecognitionBlazorApp/Layout/NavMenu.razor]
+[C:/Projects/RewardsAndRecognitionBlazorApp/Layout/NavMenu.razor]
 build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE5hdk1lbnUucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-uux3bk2j9w

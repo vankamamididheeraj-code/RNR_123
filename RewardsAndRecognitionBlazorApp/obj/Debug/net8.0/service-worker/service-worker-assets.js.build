@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "pdCPCvcu",
+  "version": "FmQgr/p1",
   "assets": [
     {
       "hash": "sha256-7zhu9E5dp6RcadXKzBFYydLvYHNWqcJQoPonq49+AtY=",
@@ -218,11 +218,11 @@ self.assetsManifest = {
       "url": "_framework/Microsoft.Win32.Registry.wasm"
     },
     {
-      "hash": "sha256-tFa4dvvI9kK49pw304VODCN6OipNc966llVSnqwbbyg=",
+      "hash": "sha256-nVMAYJxzM7zTixoQDeP9hnnMHhclDY6jUiu2r6XPaR0=",
       "url": "_framework/RewardsAndRecognitionBlazorApp.pdb"
     },
     {
-      "hash": "sha256-xsy+HYKaDnjbP0JPzNm7UZj5YemYvxp+shJU4e3MKEU=",
+      "hash": "sha256-NCKPcf3KT0sbSRcI5WefQtP+jSVUjrTsi12nDjsnv18=",
       "url": "_framework/RewardsAndRecognitionBlazorApp.wasm"
     },
     {
@@ -882,7 +882,7 @@ self.assetsManifest = {
       "url": "_framework/WindowsBase.wasm"
     },
     {
-      "hash": "sha256-VlrN3hcJ6yDK5ts70ZGugf7ANsrRKA87eH5RT4rxhmo=",
+      "hash": "sha256-XsMu6XjyLPIkE4Ce45seuwShfmeZH7RShDuRkhebVLA=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -938,7 +938,7 @@ self.assetsManifest = {
       "url": "_framework/netstandard.wasm"
     },
     {
-      "hash": "sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=",
+      "hash": "sha256-Wk2FTfGRwVwXpXR6wjim3O1hrj74WpE5toD5hzJSslc=",
       "url": "css/all.min.css"
     },
     {
@@ -946,7 +946,7 @@ self.assetsManifest = {
       "url": "css/app.css"
     },
     {
-      "hash": "sha256-u2/YzYU5TLNn6KxY5HKS8taOsoj6Evq2jmVDCl3fzkg=",
+      "hash": "sha256-nJMrtmD4Fx15M4zjJ/HWxgBNJGEot/w8/RlovlxOyy0=",
       "url": "css/bootstrap-icons/bootstrap-icons.css"
     },
     {
@@ -998,11 +998,11 @@ self.assetsManifest = {
       "url": "js/usersUi.js"
     },
     {
-      "hash": "sha256-gvZPYrsDwbwYJLD5yeBfcNujPhRoGOY831wwbIzz3t0=",
+      "hash": "sha256-JDJ424DHaphTAZCH6UKdhuZNr9MC6j5HTngeLbi7vPs=",
       "url": "js/vendor/bootstrap.bundle.min.js"
     },
     {
-      "hash": "sha256-3s55x5rvnmHXnqLlMg0v8/YOseaMNdiTF6I/CKxcQVE=",
+      "hash": "sha256-l3yyxTpLj75BfcGkjb5fUfFyCtGDvwnTSobgMuNEkrY=",
       "url": "js/vendor/sweetalert2.all.min.js"
     },
     {

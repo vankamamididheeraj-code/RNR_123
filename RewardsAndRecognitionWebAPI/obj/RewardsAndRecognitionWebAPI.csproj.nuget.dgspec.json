@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj": {}
+    "C:\\Projects\\RewardsAndRecognitionWebApi\\RewardsAndRecognitionWebAPI.csproj": {}
   },
   "projects": {
-    "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
+    "C:\\Projects\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj",
+        "projectUniqueName": "C:\\Projects\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj",
         "projectName": "RewardsAndRecognitionRepository",
-        "projectPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj",
-        "packagesPath": "C:\\Users\\PK018426\\.nuget\\packages\\",
-        "outputPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\obj\\",
+        "projectPath": "C:\\Projects\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj",
+        "packagesPath": "C:\\Users\\VV018423\\.nuget\\packages\\",
+        "outputPath": "C:\\Projects\\RewardsAndRecognitionRepository\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\PK018426\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\VV018423\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -97,20 +97,20 @@
         }
       }
     },
-    "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj": {
+    "C:\\Projects\\RewardsAndRecognitionWebApi\\RewardsAndRecognitionWebAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
+        "projectUniqueName": "C:\\Projects\\RewardsAndRecognitionWebApi\\RewardsAndRecognitionWebAPI.csproj",
         "projectName": "RewardsAndRecognitionWebAPI",
-        "projectPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\RewardsAndRecognitionWebAPI.csproj",
-        "packagesPath": "C:\\Users\\PK018426\\.nuget\\packages\\",
-        "outputPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionWebAPI\\obj\\",
+        "projectPath": "C:\\Projects\\RewardsAndRecognitionWebApi\\RewardsAndRecognitionWebAPI.csproj",
+        "packagesPath": "C:\\Users\\VV018423\\.nuget\\packages\\",
+        "outputPath": "C:\\Projects\\RewardsAndRecognitionWebApi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\PK018426\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\VV018423\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -125,8 +125,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
-                "projectPath": "C:\\Project\\RNR_123\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj"
+              "C:\\Projects\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj": {
+                "projectPath": "C:\\Projects\\RewardsAndRecognitionRepository\\RewardsAndRecognitionRepository.csproj"
               }
             }
           }

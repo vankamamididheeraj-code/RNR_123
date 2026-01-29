@@ -10,6 +10,8 @@
 @inject IJSRuntime JS
 
 <AdminNavBar ActivePage="Category" />
+ 
+<div class="container-lg px-3">
 
 <div class="user-header">
     <h2><i class="bi bi-tags-fill me-2"></i> Categories</h2>
@@ -124,6 +126,8 @@
             <Pager PageNumber="PageNumber" PageSize="PageSize" TotalCount="TotalCount" PageChanged="LoadPage" />
         </div>
     }
+</div>
+
 </div>
 
 <style>

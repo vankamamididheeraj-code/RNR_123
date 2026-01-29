@@ -9,7 +9,9 @@
 
 <AdminNavBar ActivePage="Users" />
 
-<div class="user-header">
+<div class="container-lg px-3">
+
+    <div class="user-header">
     <h2><i class="bi bi-people-fill me-2"></i> Users</h2>
 
     <div class="d-flex align-items-center gap-3 flex-wrap">
@@ -135,6 +137,8 @@
             <Pager PageNumber="@PageNumber" PageSize="@PageSize" TotalCount="@TotalCount" PageChanged="async (p) => await LoadPage(p)" />
         </div>
     }
+    </div>
+
 </div>
 
 <style>

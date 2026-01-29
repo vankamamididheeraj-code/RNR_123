@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "RewardsAndRecognitionBlazorApp",
   "resources": {
-    "hash": "sha256-iHxa+B//Tt/zreZ7yntjb5WqdXVp0eHJzB+KVgU3SR4=",
+    "hash": "sha256-u2kW68aVLAlt/RWc+DnTjvtSTZQ8W4Z1VFFMGQmZC88=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-NljIbpK/1KCj0+knpX8U77Rbl5kTtfFIuFjK7AuczEw="
     },
@@ -237,10 +237,10 @@
       "mscorlib.wasm": "sha256-oV7k+vcNqj7FS6Y/lMtdhVlq3myDH55/wVxmO4QPrw4=",
       "netstandard.wasm": "sha256-XMXMB0WW//vbNNgQiFAqYo7IJ2C4yQX590aoAbOtTB4=",
       "System.Private.CoreLib.wasm": "sha256-tuhzUgbFn7ji3yhMSxyBLHAps9h0RsFnq+8pUoizHiw=",
-      "RewardsAndRecognitionBlazorApp.wasm": "sha256-xsy+HYKaDnjbP0JPzNm7UZj5YemYvxp+shJU4e3MKEU="
+      "RewardsAndRecognitionBlazorApp.wasm": "sha256-NCKPcf3KT0sbSRcI5WefQtP+jSVUjrTsi12nDjsnv18="
     },
     "pdb": {
-      "RewardsAndRecognitionBlazorApp.pdb": "sha256-tFa4dvvI9kK49pw304VODCN6OipNc966llVSnqwbbyg="
+      "RewardsAndRecognitionBlazorApp.pdb": "sha256-nVMAYJxzM7zTixoQDeP9hnnMHhclDY6jUiu2r6XPaR0="
     }
   },
   "cacheBootResources": true,
